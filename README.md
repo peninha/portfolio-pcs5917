@@ -2,7 +2,7 @@
 
 ## Portfólio Individual
 
-**Aluno:** Nome do aluno ou aluna  
+**Aluno:** Roberto Spinelli Filho  
 **Disciplina:** PCS5917 – IA Adversarial  
 **Período:** 3º período de 2026  
 **Instituição:** Universidade de São Paulo – Escola Politécnica  
