@@ -40,10 +40,23 @@ Organize seu README focando em ser objetivo, com evidências de resultados e cit
 │   ├── aula-06-llm-judge.ipynb
 │   └── aula-07-defesas-llm.ipynb
 ├── images/ (colocar aqui as imagens usadas no README)
-│   └── ...
+│   └── atividade1_forum_noticias_ataque_adversarial.png
 └── outros/
     └── ...
 ```
+
+## 3. Aula 1 – Notícias e referências científicas
+
+Atividade no fórum da disciplina: discussão da notícia e do artigo sobre **Nightshade**, ferramenta de *data poisoning* usada por artistas digitais para impedir que modelos geradores de imagem copiem seus estilos.
+
+**Referências:**
+- Notícia: [Scientific American – How art anti-AI poison works](https://www.scientificamerican.com/article/art-anti-ai-poison-heres-how-it-works/?utm_source=chatgpt.com)
+- Artigo: [Nightshade (Oakland 2024)](https://people.cs.uchicago.edu/~ravenben/publications/pdf/nightshade-oakland24.pdf)
+
+![Discussão no fórum sobre Nightshade e data poisoning](images/atividade1_forum_noticias_ataque_adversarial.png)
+
+## 4. Aula 2 – Palestra
+
 
 ## Disclaimer de Uso Ético
 
