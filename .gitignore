@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.env
+.cache/
+# Downloads de entrada: referências e hashes ficam em resultados/.
+outros/aula-02-ataque-manual/dados/*.csv
+# Pesos ficam locais. Não exclui CSVs de resultados nem os áudios da aula 3.
+*.safetensors
+*.gguf

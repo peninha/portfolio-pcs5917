@@ -39,7 +39,7 @@ use esta pasta `subconjunto_288` para o experimento atualizado.
 Na raiz do repositório:
 
 ```sh
-python outros/aula3-deteccao_audio_falso/preparar_subconjunto.py --download
+python outros/aula-03-deteccao-audio-falso/preparar_subconjunto.py --download
 ```
 
 O script usa a biblioteca padrão do Python 3. Reproduz a seleção inicial com

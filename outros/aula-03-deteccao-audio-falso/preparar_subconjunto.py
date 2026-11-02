@@ -14,7 +14,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parent
+BASE = Path(__file__).resolve().parent / "dados"
 ORIGINAL = BASE / "subconjunto_192"
 OUT = BASE / "subconjunto_288"
 DATASET = "https://www.kaggle.com/api/v1/datasets/download/ulianazb/asvspoof-2024/"

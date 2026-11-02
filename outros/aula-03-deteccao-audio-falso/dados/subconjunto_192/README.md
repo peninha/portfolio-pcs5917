@@ -40,7 +40,7 @@ localizados na pasta superior. Os FLAC originais são preservados, sem conversã
 Na raiz do repositório, com Python 3 e acesso à internet:
 
 ```sh
-python outros/aula3-deteccao_audio_falso/preparar_subconjunto.py --download
+python outros/aula-03-deteccao-audio-falso/preparar_subconjunto.py --download
 ```
 
 O comando acima agora gera o conjunto ampliado em `../subconjunto_288`,
