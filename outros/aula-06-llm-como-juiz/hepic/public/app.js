@@ -1,9 +1,21 @@
 import { parseCSV, normalizeItems } from './import.js';
+import { createStateRefresh } from './state-refresh.js';
 
 const $=s=>document.querySelector(s);
 const app=$('#app');
 let data=null,mode='rater',section='overview',selected=null,busy=false,noticeTimer;
-let refreshSequence=0,refreshInFlight=false,syncedAt=null;
+let syncedAt=null,filePickerActive=false,importDraft=null,importSequence=0;
+const stateRefresh=createStateRefresh({
+  load:()=>request('/api/state'),
+  canRefresh:()=>Boolean(data)&&document.visibilityState==='visible'&&!busy&&!filePickerActive&&!importDraft&&!editingForm(),
+  apply(next){
+    if(data&&(data.user.id!==next.user.id||data.cycleId!==next.cycleId)){
+      drafts.clear();selected=null;importDraft=null;importSequence++;filePickerActive=false;
+      if(data.user.id!==next.user.id)section='overview';
+    }
+    data=next;mode=data.user.admin?'admin':'rater';syncedAt=new Date();render();
+  }
+});
 const drafts=new Map();
 const phases={setup:'Preparação',training:'Treinamento',calibration:'Calibração',calibration_review:'Revisão da calibração',calibrated:'Calibração concluída',evaluation:'Avaliação',completed:'Concluído'};
 const statusNames={pending:'Aguardando notas',single:'Avaliação única',agreement:'Dentro do limiar',adjudication:'Aguardando pesquisador',adjudicated:'Adjudicado',inconclusive:'Inconclusivo'};
@@ -37,16 +49,8 @@ async function request(path,body) {
   return result;
 }
 async function run(fn){if(busy)return;busy=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);try{await fn();}catch(e){notice(e.message,true);}finally{busy=false;document.querySelectorAll('button').forEach(b=>b.disabled=false);}}
-async function refresh(){
-  const sequence=++refreshSequence;refreshInFlight=true;
-  try {
-    const next=await request('/api/state');
-    if(sequence!==refreshSequence)return;
-    if(data&&data.user.id!==next.user.id){drafts.clear();selected=null;section='overview';}
-    data=next;mode=data.user.admin?'admin':'rater';syncedAt=new Date();render();
-  } finally {if(sequence===refreshSequence)refreshInFlight=false;}
-}
-async function navigate(nextSection){section=nextSection;await refresh();}
+async function refresh(options){return stateRefresh.refresh(options);}
+async function navigate(nextSection){filePickerActive=false;section=nextSection;await refresh();}
 function editingForm(){
   return [...document.querySelectorAll('form input, form textarea, form select, input[type="file"]')].some(el=>{
     if(el.type==='file')return el.files.length>0;
@@ -56,9 +60,10 @@ function editingForm(){
   });
 }
 function refreshOnReturn(){
-  if(!data||document.visibilityState!=='visible'||busy||refreshInFlight||editingForm())return;
-  // Event-driven refresh only: no background polling or form replacement.
-  run(refresh);
+  if(stateRefresh.pending)return;
+  // Do not occupy the action lock: returning from a native file chooser can
+  // fire focus before the file input's change event.
+  refresh({background:true}).catch(e=>notice(e.message,true));
 }
 window.addEventListener('focus',refreshOnReturn);
 document.addEventListener('visibilitychange',refreshOnReturn);
@@ -69,6 +74,7 @@ function heading(eyebrow,title,description,actions=[]){return h('div',{class:'pa
 function table(headers,rows){return h('div',{class:'table-wrap'},h('table',{},h('thead',{},h('tr',{},headers.map(t=>h('th',{},t)))),h('tbody',{},rows.map(row=>h('tr',{},row.map(v=>h('td',{},v)))))));}
 function brand(){return h('div',{class:'brand'},h('div',{class:'mark'},'H'),h('div',{},h('div',{class:'wordmark'},'HEPIC'),h('small',{},'HUMAN EVALUATION PROTOCOL')));}
 function login() {
+  importDraft=null;importSequence++;filePickerActive=false;
   mode='rater';
   app.replaceChildren(h('div',{class:'login-page'},h('section',{class:'login-intro'},brand(),h('div',{class:'eyebrow'},'CALIBRAÇÃO ITERATIVA'),h('h1',{},'Avaliação humana com critérios compartilhados.'),h('p',{},'Um espaço de trabalho para treinar avaliadores, calibrar julgamentos e avaliar ataques a modelos de linguagem.'),h('div',{class:'login-stages'},h('span',{},'01 Treinamento'),h('span',{},'02 Calibração'),h('span',{},'03 Avaliação'))),h('section',{class:'login-form'},h('div',{class:'login-inner'},h('div',{class:'eyebrow'},'BEM-VINDO AO ESTUDO'),h('h2',{},'Acesse sua avaliação'),h('p',{},'Use o link de convite enviado pelo pesquisador ou cole o convite abaixo.'),form(async f=>{const code=f.code.includes('#invite=')?f.code.split('#invite=')[1]:f.code.trim();await request('/api/invite',{code});await refresh();},input('code','Link ou código de convite','text','',{required:true,autocomplete:'off'}),submit('Entrar no estudo')),h('details',{},h('summary',{},'Acesso do pesquisador'),form(async f=>{await request('/api/bootstrap',f);mode='admin';section='overview';await refresh();},input('name','Seu nome','text','',{autocomplete:'name'}),input('secret','Chave do pesquisador','password','',{required:true,autocomplete:'off'}),submit('Entrar como pesquisador')),h('p',{class:'muted'},'A chave é definida na configuração do servidor. Ela permite recuperar o acesso administrativo.'))))));
 }
@@ -143,17 +149,54 @@ function overviewPage(){const a=data.admin;
 function peoplePage(){return h('div',{},heading('EQUIPE DO ESTUDO','Avaliadores do estudo','O acesso do pesquisador é separado. Cadastre os três perfis de avaliador, inclusive o seu se você também for avaliar. Cada perfil recebe um convite individual.'),card(table(['Nome','Papel',`Treinamento · v${data.referenceVersion}`,'Acesso'],data.admin.users.map(u=>[u.name,'Avaliador',u.trained?'Concluído':'Pendente',btn('Gerar convite',async()=>{
     const invite=await request('/api/invitations',{userId:u.id});const box=$('#invite-result');box.replaceChildren(h('h3',{},`Convite para ${u.name}`),h('div',{class:'invite-link'},invite.url),h('p',{class:'muted'},'Válido por 7 dias e utilizável uma vez. Um novo convite encerra os acessos anteriores deste avaliador.'),btn('Copiar link',async()=>{await navigator.clipboard.writeText(invite.url);notice('Link copiado.');}));
   })]))),h('div',{id:'invite-result',class:'card'}),data.admin.users.length<3?card(h('h2',{},'Adicionar avaliador'),form(async f=>send('addUser',f),input('name','Nome','text','',{required:true,maxlength:100}),submit('Adicionar à equipe'))):null);}
+function importPreview(){
+  const preview=h('div',{id:'import-preview'});
+  if(!importDraft)return preview;
+  const draft=importDraft;
+  preview.append(h('p',{},h('strong',{},'Arquivo preparado: '),draft.fileName));
+  if(draft.reading)preview.append(h('p',{class:'muted',role:'status'},'Lendo e validando o arquivo…'));
+  else if(draft.error)preview.append(h('p',{role:'alert'},draft.error));
+  else if(draft.items){
+    preview.append(h('p',{},draft.items.length+' itens válidos encontrados. Confira a amostra antes de importar.'),
+      table(['ID','Método','Idioma','Tarefa'],draft.items.slice(0,5).map(i=>[i.id,i.method,i.language,i.objective.slice(0,130)])),
+      btn('Importar '+draft.items.length+' itens',async()=>{
+        if(draft!==importDraft||draft.cycleId!==data.cycleId)throw Error('O ciclo mudou. Selecione o arquivo novamente.');
+        await request('/api/command',{type:'import',cycleId:draft.cycleId,data:draft.items,source:draft.fileName});
+        importDraft=null;importSequence++;await refresh();notice('Importação concluída.');
+      },'primary'));
+  }
+  preview.append(btn('Descartar seleção',()=>{importDraft=null;importSequence++;filePickerActive=false;render();}));
+  return preview;
+}
+function updateImportPreview(){const previous=$('#import-preview');if(previous)previous.replaceWith(importPreview());}
+async function selectImportFile(event){
+  const file=event.target.files[0];
+  if(!file){filePickerActive=false;return;}
+  const attempt=++importSequence;
+  importDraft={fileName:file.name,cycleId:data.cycleId,items:null,error:null,reading:true};
+  updateImportPreview();
+  try{
+    if(file.size>5*1024*1024)throw Error('O arquivo deve ter no máximo 5 MB.');
+    const text=await file.text();
+    const raw=file.name.toLowerCase().endsWith('.json')?JSON.parse(text):parseCSV(text);
+    const items=normalizeItems(raw);
+    if(attempt===importSequence&&importDraft)importDraft.items=items;
+  }catch(error){if(attempt===importSequence&&importDraft)importDraft.error=error.message;}
+  finally{
+    filePickerActive=false;
+    if(attempt===importSequence&&importDraft){importDraft.reading=false;updateImportPreview();}
+  }
+}
 function datasetPage(){
   const wrapper=h('div',{},heading('FONTE DOS ITENS','Base de dados','Importe a aba Dados_Caio como CSV ou o JSON preparado a partir da planilha. IDs existentes são preservados e não podem ser sobrescritos.'));
   const mayImport=['setup','training','calibration_review'].includes(data.phase);
-  const preview=h('div',{id:'import-preview'});
-  if(mayImport)wrapper.append(card(h('h2',{},'Importar itens'),h('p',{},'Na planilha, selecione Dados_Caio e baixe em Arquivo → Fazer download → CSV. O campo “Resultado anterior” é guardado, mas não aparece no julgamento independente.'),h('div',{class:'file-drop'},h('label',{},'Arquivo CSV ou JSON',h('input',{type:'file',accept:'.csv,.json,.tsv',onChange:event=>run(async()=>{
-    const file=event.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('O arquivo deve ter no máximo 5 MB.');
-    const text=await file.text();let raw=file.name.endsWith('.json')?JSON.parse(text):parseCSV(text);const items=normalizeItems(raw);
-    preview.replaceChildren(h('p',{},`${items.length} itens válidos encontrados. Confira a amostra antes de importar.`),table(['ID','Método','Idioma','Tarefa'],items.slice(0,5).map(i=>[i.id,i.method,i.language,i.objective.slice(0,130)])),btn(`Importar ${items.length} itens`,async()=>{await send('import',{data:items,source:file.name});notice('Importação concluída.');},'primary'));
-  })}))),preview));
+  if(mayImport)wrapper.append(card(h('h2',{},'Importar itens'),h('p',{},'Na planilha, selecione Dados_Caio e baixe em Arquivo → Fazer download → CSV. O campo “Resultado anterior” é guardado, mas não aparece no julgamento independente.'),
+    h('div',{class:'file-drop'},h('label',{},'Arquivo CSV ou JSON',h('input',{
+      type:'file',accept:'.csv,.json,.tsv',onClick:()=>{filePickerActive=true;},
+      onCancel:()=>{filePickerActive=false;},onChange:selectImportFile
+    }))),importPreview()));
   else wrapper.append(h('div',{class:'callout'},h('p',{},'A importação está pausada nesta etapa para manter a amostra estável. Para acrescentar dados após a avaliação, exporte os resultados e abra um novo ciclo em Configuração.')));
-  wrapper.append(card(h('div',{class:'row between'},h('h2',{},'Itens disponíveis'),badge(`${data.admin.totalItems} itens`)),table(['ID','Método','Modelo','Idioma','Uso'],data.admin.items.map(i=>[i.id,i.method,i.target,i.language,i.inconclusive?'Inconclusivo':i.reference?'Referência':'Base']))));return wrapper;
+  wrapper.append(card(h('div',{class:'row between'},h('h2',{},'Itens disponíveis'),badge(data.admin.totalItems+' itens')),table(['ID','Método','Modelo','Idioma','Uso'],data.admin.items.map(i=>[i.id,i.method,i.target,i.language,i.inconclusive?'Inconclusivo':i.reference?'Referência':'Base']))));return wrapper;
 }
 function referenceAdminPage(){
   const wrapper=h('div',{},heading('MATERIAL DE TREINAMENTO','Referências do pesquisador','Selecione exemplos que expliquem os limites entre 0, 1 e 2. As notas de referência são decisões suas; resultados anteriores não são importados como referência. Se o item não puder ser julgado, marque Inconclusivo e explique o motivo; ele ficará fora das amostras e dos exemplos.'));
