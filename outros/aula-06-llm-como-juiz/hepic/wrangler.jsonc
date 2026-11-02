@@ -4,6 +4,6 @@
   "main": "src/worker.mjs",
   "compatibility_date": "2026-10-30",
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
-  "d1_databases": [{ "binding": "DB", "database_name": "hepic", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "migrations" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "hepic", "database_id": "3c2c30f5-0a60-4b3f-8cf0-fc7716c22438", "migrations_dir": "migrations" }],
   "observability": { "enabled": false }
 }

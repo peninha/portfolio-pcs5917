@@ -3,6 +3,16 @@ __pycache__/
 .ipynb_checkpoints/
 .env
 .cache/
+# Dependências e caches locais de JavaScript/Cloudflare.
+node_modules/
+.pnpm-store/
+.wrangler/
+.local/
+# Segredos locais; exemplos podem continuar versionados.
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
 # Downloads de entrada: referências e hashes ficam em resultados/.
 outros/aula-02-ataque-manual/dados/*.csv
 # Pesos ficam locais. Não exclui CSVs de resultados nem os áudios da aula 3.

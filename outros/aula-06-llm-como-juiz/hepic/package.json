@@ -2,6 +2,7 @@
   "name": "hepic",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.25.0",
   "type": "module",
   "engines": {
     "node": ">=22.13"
@@ -9,6 +10,7 @@
   "scripts": {
     "start": "node scripts/local.mjs",
     "test": "node --test test/*.test.mjs",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
     "check": "node --check src/domain.mjs && node --check src/worker.mjs && node --check public/app.js"
   },
   "devDependencies": {

@@ -31,6 +31,34 @@ Para outro diretório ou porta, use `DATA_DIR` e `PORT`. O servidor local escuta
 
 ## Publicar na sua conta Cloudflare
 
+### Publicação automática pelo GitHub
+
+O caminho recomendado é Workers Builds, conectado ao repositório `peninha/portfolio-pcs5917`. Um push na branch de produção dispara os testes e, se passarem, publica o Worker. O Git contém o software; os dados do estudo permanecem no D1 e a chave do pesquisador permanece nos segredos da Cloudflare.
+
+Antes da primeira publicação, crie o D1 `hepic`, substitua o placeholder `database_id` em `wrangler.jsonc` pelo ID real e configure `BOOTSTRAP_SECRET` como segredo do Worker `hepic`. O ID do banco pode ser versionado; a chave de acesso não deve ser versionada. As instruções por terminal estão abaixo.
+
+No painel Cloudflare, abra **Workers & Pages → Create application → GitHub**, conecte o repositório e configure:
+
+| Campo | Valor |
+| --- | --- |
+| Worker name | `hepic` |
+| Production branch | `main` |
+| Root directory | `outros/aula-06-llm-como-juiz/hepic` |
+| Build command | `pnpm test` |
+| Deploy command | `pnpm run deploy` |
+| Build variable `NODE_VERSION` | `24.22.1` |
+| Build variable `PNPM_VERSION` | `11.25.0` |
+
+Se o Worker já existir, conecte o GitHub em **Settings → Builds → Connect**. O nome do Worker deve coincidir com `name` no `wrangler.jsonc`. Configure a chave na seção de **segredos de execução do Worker**, não somente nas variáveis do ambiente de build. O comando de deploy aplica apenas migrações D1 pendentes antes de publicar; o token utilizado pelo build precisa permitir migrações no D1 vinculado.
+
+O provedor instala as dependências a partir do lockfile. O script `deploy` usa o binding `DB`, sem depender do nome físico do banco. Não execute esse script em builds de preview contra o banco de produção; mantenha previews desativados até configurar um banco e segredos separados para eles.
+
+Envie os arquivos do HEPIC ao GitHub com um commit e push, preservando alterações de outras atividades. `.local/`, `.wrangler/`, bancos SQLite, segredos e `node_modules/` estão no `.gitignore` do aplicativo. A integração não migra os dados do SQLite local para o D1 remoto.
+
+Referência: [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) e [configuração de builds](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
+
+### Publicação por terminal e configuração inicial
+
 No Windows, `run.cmd` também aceita argumentos do Node. Por exemplo, `.\run.cmd --version` mostra a versão encontrada e `.\run.cmd node_modules/wrangler/bin/wrangler.js login` inicia a autenticação no Cloudflare. O iniciador só ajusta o PATH do próprio processo.
 
 O projeto inclui o Wrangler oficial e um lockfile. As dependências já estão instaladas nesta máquina. Em uma instalação nova, execute `pnpm install --frozen-lockfile` primeiro. Para autenticar e criar o banco no Windows:

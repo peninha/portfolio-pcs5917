@@ -1,7 +1,0 @@
-.local/
-.wrangler/
-.dev.vars
-node_modules/
-*.sqlite*
-.env*
-!.env.example
