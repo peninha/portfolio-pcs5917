@@ -20,6 +20,35 @@ test('discordância dos oito exemplos e mediana sem arredondamento',()=>{
   assert.equal(disagreement([1]),null);assert.equal(disagreement([]),null);
   assert.equal(median([0,1]),.5);assert.equal(median([1,2]),1.5);assert.equal(median([2,0,1]),1);assert.equal(median([]),null);
 });
+
+test('pesquisador ajusta limiar no treinamento, preserva confirmações e registra o motivo',()=>{
+  const t=study({k:1});t.act('startTraining');
+  for(const u of raters(t.s))t.act('acknowledge',{version:t.s.referenceVersion},u);
+  const trained=structuredClone(t.s.cycle.trained),version=t.s.referenceVersion;
+  const config=structuredClone(t.s.cycle.config);
+  t.act('updateThreshold',{threshold:.35,reason:'Aceitar a diferença média correspondente a um terço.'});
+  assert.equal(t.s.cycle.config.threshold,.35);assert.equal(t.s.cycle.phase,'training');
+  assert.deepEqual(t.s.cycle.trained,trained);assert.equal(t.s.referenceVersion,version);
+  assert.deepEqual({...t.s.cycle.config,threshold:config.threshold},config);
+  assert.equal(t.s.cycle.thresholdChanges[0].previous,.33);
+  assert.equal(t.s.cycle.thresholdChanges[0].next,.35);assert.equal(t.s.cycle.thresholdChanges[0].actor,t.admin.id);
+  assert(t.s.audit.some(e=>e.type==='threshold_changed'&&e.details.reason.includes('um terço')));
+  t.act('startCalibration');rateCalibration(t,a=>a.userId==='c'?1:0);
+  assert.equal(t.s.cycle.phase,'calibrated');assert.equal(t.s.cycle.rounds[0].failed.length,0);
+});
+
+test('ajuste de limiar exige pesquisador, justificativa e fase de treinamento',()=>{
+  const t=study();
+  assert.throws(()=>t.act('updateThreshold',{threshold:.35,reason:'Motivo válido.'}),/não está disponível/);
+  t.act('startTraining');
+  assert.throws(()=>t.act('updateThreshold',{threshold:.35,reason:'Motivo válido.'},raters(t.s)[0]),/exclusiva/);
+  assert.throws(()=>t.act('updateThreshold',{threshold:.35,reason:''}),/justificativa/);
+  for(const threshold of [NaN,Infinity,-.01,1.01,'35'])assert.throws(()=>t.act('updateThreshold',{threshold,reason:'Motivo válido.'}),/inválido/);
+  assert.equal(t.s.cycle.config.threshold,.33);
+  for(const u of raters(t.s))t.act('acknowledge',{version:t.s.referenceVersion},u);
+  t.act('startCalibration');
+  assert.throws(()=>t.act('updateThreshold',{threshold:.35,reason:'Motivo válido.'}),/não está disponível/);
+});
 test('amostra estratificada proporcional, sem reposição e reproduzível',()=>{
   const items=Array.from({length:100},(_,i)=>({id:i,method:i<80?'A':'B',target:'M',language:'ptBR'}));
   const a=stratifiedSample(items,10,'seed');assert.deepEqual(a,stratifiedSample(items,10,'seed'));

@@ -138,6 +138,15 @@ export function command(s,actor,cmd,now=new Date().toISOString()) {
       must(typeof seed==='string'&&seed.trim().length>0&&seed.length<=200,'Semente inválida.');
       c.config={threshold,sampleSize,fraction,seed:seed.trim()};break;
     }
+    case 'updateThreshold': {
+      admin();phase('training');
+      must(typeof cmd.threshold==='number'&&Number.isFinite(cmd.threshold)&&cmd.threshold>=0&&cmd.threshold<=1,'Limiar inválido.');
+      const reason=rationale(cmd.reason),previous=c.config.threshold;
+      must(cmd.threshold!==previous,'O novo limiar é igual ao atual.');
+      const change={at:now,actor:actor.id,previous,next:cmd.threshold,reason,afterRound:c.rounds.length};
+      (c.thresholdChanges??=[]).push(change);c.config.threshold=cmd.threshold;
+      addAudit(s,actor,'threshold_changed',{cycleId:c.id,...change},now);break;
+    }
     case 'addUser':
       admin();phase('setup');must(raters(s).length<3,'Esta versão utiliza exatamente três avaliadores, além do pesquisador.');
       must(typeof cmd.name==='string'&&cmd.name.trim()&&cmd.name.length<=100,'Informe o nome do avaliador.');
