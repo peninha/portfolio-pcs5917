@@ -70,7 +70,7 @@ Atividade no fórum da disciplina: discussão da notícia e do artigo sobre **Ni
 
 ## 4. Aula 2 – Red teaming manual de LLMs
 
-Atividade de red teaming realizada localmente, com autorização do professor, usando **DeepSeek-R1-Distill-Qwen-14B em NF4 de 4 bits**, em uma RTX 4090 de 24 GB. Foram comparados pedidos diretos e os mesmos pedidos envolvidos em estratégias do Self-Reminder-Data, com entradas em português e inglês.
+Atividade de red teaming realizada localmente usando **DeepSeek-R1-Distill-Qwen-14B em NF4 de 4 bits**, em uma RTX 4090 de 24 GB. Foram comparados pedidos diretos e os mesmos pedidos envolvidos em estratégias do Self-Reminder-Data, com entradas em português e inglês.
 
 ### Entregáveis
 
