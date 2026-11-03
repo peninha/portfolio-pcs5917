@@ -14,6 +14,27 @@ function study({n=40,threshold=.33,k=3}={}) {
 function train(t){t.act('startTraining');for(const u of raters(t.s))t.act('acknowledge',{version:t.s.referenceVersion},u);t.act('startCalibration');}
 function rateCalibration(t,scoreFor=()=>0){for(const a of [...t.s.cycle.assignments].filter(a=>a.phase==='calibration'&&a.round===t.s.cycle.rounds.at(-1).number&&a.score===null))t.act('submit',{assignmentId:a.id,score:scoreFor(a),justification:'Justificativa sintética.'},t.s.users.find(u=>u.id===a.userId));}
 
+test('notas aceitam observação ausente, vazia ou curta sem bloquear a calibração',()=>{
+  for(const justification of [undefined,'','   ','x']) {
+    const t=study({k:1});train(t);
+    for(const [score,a] of t.s.cycle.assignments.entries()) {
+      t.act('submit',{assignmentId:a.id,score,justification},t.s.users.find(u=>u.id===a.userId));
+      assert.equal(a.justification,justification?.trim()??'');assert.equal(a.score,score);
+    }
+    assert.equal(t.s.cycle.phase,'calibration_review');
+    t.act('adjudicate',{itemId:t.s.cycle.rounds[0].failed[0],score:1});
+    assert.equal(t.s.cycle.rounds[0].decisions[t.s.cycle.rounds[0].failed[0]].justification,'');
+  }
+});
+
+test('referências numéricas aceitam observação opcional e notas rejeitam observação inválida',()=>{
+  const t=study();t.act('reference',{itemId:'case-1',score:2});
+  assert.equal(t.s.references['case-1'].justification,'');train(t);
+  const a=t.s.cycle.assignments[0],actor=t.s.users.find(u=>u.id===a.userId);
+  for(const justification of [123,'x'.repeat(4001)])assert.throws(()=>t.act('submit',{assignmentId:a.id,score:0,justification},actor),/observação/);
+  assert.equal(a.score,null);
+});
+
 test('discordância dos oito exemplos e mediana sem arredondamento',()=>{
   const cases=[[[0,0],0],[[0,1],.5],[[0,2],1],[[1,1,1],0],[[0,0,1],1/3],[[0,1,2],2/3],[[1,2,1,1],.25],[[0,2,2,2],.5]];
   for(const [scores,expected]of cases)assert.equal(disagreement(scores),expected);

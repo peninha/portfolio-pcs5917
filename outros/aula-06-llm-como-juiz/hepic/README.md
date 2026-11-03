@@ -124,7 +124,7 @@ Novos itens podem ser acrescentados na preparação, no treinamento ou durante a
 
 ## Regras metodológicas implementadas
 
-- Notas individuais inteiras: 0, 1 e 2, com justificativa obrigatória.
+- Notas individuais inteiras: 0, 1 e 2, com justificativa / observação opcional, sem tamanho mínimo. A observação também é opcional para decisões numéricas do pesquisador; em casos inconclusivos, o motivo continua obrigatório (3 a 4.000 caracteres).
 - **Sinalização do avaliador:** durante calibração e avaliação, o avaliador pode escolher “Inconclusivo / não consigo avaliar”, sem score e com observação obrigatória. Isso conclui sua atribuição e encaminha o item ao pesquisador, sem excluir o item automaticamente e sem converter a sinalização em zero. Na calibração, a revisão aguarda o fim da rodada; na avaliação, aguarda as respostas inicialmente atribuídas ao item. Não se solicita um terceiro avaliador para substituir essa sinalização: o pesquisador decide se atribui uma nota final ou confirma o inconclusivo. A discordância usa apenas as notas numéricas disponíveis e é não aferível quando há menos de duas. Sinalizações são preservadas no histórico e no CSV de avaliações individuais, com outcome `inconclusive` e score vazio.
 - Para duas ou mais notas: `D = soma(|s_i - s_j|, i < j) / (n * (n - 1))`.
 - Para menos de duas notas: discordância `null`, apresentada como não aferível.

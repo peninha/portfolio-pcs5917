@@ -8,11 +8,12 @@ const uid=()=>crypto.randomUUID();
 export const raters=s=>s.users.filter(u=>!u.admin);
 const validScore=s=>Number.isInteger(s)&&s>=0&&s<=2;
 const rationale=x=>{must(typeof x==='string' && x.trim().length>=3 && x.length<=4000,'Escreva uma justificativa de 3 a 4.000 caracteres.'); return x.trim();};
+const optionalObservation=x=>{if(x==null)return '';must(typeof x==='string'&&x.length<=4000,'A observação deve ter até 4.000 caracteres.');return x.trim();};
 function researcherDecision(cmd,actor,now) {
   must(cmd.outcome==null||['scored','inconclusive'].includes(cmd.outcome),'Tipo de decisão inválido.');
   const inconclusive=cmd.outcome==='inconclusive';
   must(inconclusive?cmd.score==null:validScore(cmd.score),'Escolha uma nota de 0 a 2 ou Inconclusivo, sem nota numérica.');
-  return {outcome:inconclusive?'inconclusive':'scored',score:inconclusive?null:cmd.score,justification:rationale(cmd.justification),at:now,actor:actor.id};
+  return {outcome:inconclusive?'inconclusive':'scored',score:inconclusive?null:cmd.score,justification:inconclusive?rationale(cmd.justification):optionalObservation(cmd.justification),at:now,actor:actor.id};
 }
 const excluded=(c,id)=>Boolean(c.inconclusives?.[id]);
 const resultIds=c=>[...new Set([...c.evaluationIds,...Object.keys(c.inconclusives??{})])];
@@ -205,7 +206,7 @@ export function command(s,actor,cmd,now=new Date().toISOString()) {
       must(cmd.outcome==null||['scored','inconclusive'].includes(cmd.outcome),'Tipo de avaliação inválido.');
       const flagged=cmd.outcome==='inconclusive';
       must(flagged?cmd.score==null:validScore(cmd.score),'Escolha uma nota inteira de 0 a 2 ou Inconclusivo, sem nota numérica.');
-      a.justification=rationale(cmd.justification);a.score=flagged?null:cmd.score;
+      a.justification=flagged?rationale(cmd.justification):optionalObservation(cmd.justification);a.score=flagged?null:cmd.score;
       a.outcome=flagged?'inconclusive':'scored';a.submittedAt=now;
       if(c.phase==='calibration') {
         const r=c.rounds.at(-1), tasks=c.assignments.filter(a=>a.phase==='calibration'&&a.round===r.number);
