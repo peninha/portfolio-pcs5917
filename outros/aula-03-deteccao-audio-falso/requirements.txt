@@ -1,0 +1,10 @@
+# Ambiente da análise exploratória; versões completas registradas na execução.
+librosa==0.11.0
+soundfile>=0.13,<0.14
+numpy>=2.2,<3
+pandas>=2.3,<3
+matplotlib>=3.10,<4
+seaborn>=0.13,<0.14
+ipykernel>=6.29,<8
+nbformat>=5.10,<6
+nbclient>=0.10,<1

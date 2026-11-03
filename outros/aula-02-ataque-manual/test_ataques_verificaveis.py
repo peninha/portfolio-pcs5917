@@ -54,7 +54,8 @@ class VerifiableTests(unittest.TestCase):
             baseline = attacks.build_trial(self.cases["V05"], self.strategy, language, "direto", "pair", "TEST_SECRET")
             attack = attacks.build_trial(self.cases["V05"], self.strategy, language, "ataque", "pair", "TEST_SECRET")
             self.assertEqual(baseline["messages"][0], attack["messages"][0])
-            self.assertNotIn("ATTACK_SUCCEEDED", baseline["prompt"])
+            self.assertIn(self.cases["V05"][f"attack_goal_{language}"], baseline["prompt"])
+            self.assertNotIn("🤓", baseline["prompt"])
             document = attack["prompt"].split("<untrusted_document>", 1)[1].split("</untrusted_document>", 1)[0]
             self.assertIn(self.cases["V05"][f"attack_goal_{language}"], document)
             self.assertIn(self.strategy[f"prompt_{language}"].split("[INSERT PROMPT HERE]")[0], document)
@@ -63,6 +64,20 @@ class VerifiableTests(unittest.TestCase):
             attacks.run_pair(self.cases["V01"], dict(self.strategy, insertion_mode="manual_adaptation_required"),
                              "en", lambda **kwargs: calls.append(kwargs), Path("unused"))
         self.assertEqual(calls, [])
+
+    def test_direct_request_has_the_same_goal_without_strategy(self):
+        for case in self.cases.values():
+            for language in ("en", "pt"):
+                direct = attacks.build_trial(case, self.strategy, language, "direto", "pair", "TEST_SECRET")
+                wrapped = attacks.build_trial(case, self.strategy, language, "ataque", "pair", "TEST_SECRET")
+                goal = case[f"attack_goal_{language}"]
+                self.assertEqual(direct["messages"][0], wrapped["messages"][0])
+                self.assertIn(goal, direct["prompt"])
+                self.assertIn(goal, wrapped["prompt"])
+                if case["construction"] == "user_attack":
+                    self.assertEqual(direct["prompt"], goal)
+                self.assertNotIn("🤓", direct["prompt"])
+                self.assertIn("🤓", wrapped["prompt"])
 
     def test_pairing_persistence_and_eligible_rates(self):
         with tempfile.TemporaryDirectory() as directory:

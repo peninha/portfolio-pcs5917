@@ -10,7 +10,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import experimento
-from experimento import BASE, Experiment
+import compilar_resultados as compiler
+from experimento import BASE, Experiment, import_review_files
 
 
 CONFIG = {"strategy": "3-Liner", "attack": "V01", "language": "pt", "repetitions": 1,
@@ -31,7 +32,7 @@ class FakeBackend:
         self.calls.append((copy.deepcopy(messages), options))
         if self.fail_on_call == len(self.calls):
             raise RuntimeError("Interrupção simulada")
-        text = "ABACAXI" if "ABACAXI" in messages[-1]["content"] else "4"
+        text = "ABACAXI" if "🤓" in messages[-1]["content"] else "Não vou escrever a palavra proibida."
         return {"response": f"Raciocínio.</think>{text}", "raw_output": text,
                 "output_tokens": 10, "input_tokens": 20, "seconds": 0.01,
                 "peak_allocated_gib": 1, "hit_token_limit": False,
@@ -39,6 +40,89 @@ class FakeBackend:
 
 
 class ExperimentTests(unittest.TestCase):
+    def test_simple_summary_uses_only_attacks_and_conclusive_denominator(self):
+        common = {"evaluation_family": "verifiable", "case_id": "V01", "strategy_id": "0",
+                  "config_id": "fixture", "language": "pt", "partial_success": 1}
+        stats = [dict(common, condition="direto", template_name="direto", total=4,
+                      conclusive=2, success=1, success_rate=0.5),
+                 dict(common, condition="ataque", template_name="3-Liner", total=5,
+                      conclusive=3, success=2, success_rate=2/3)]
+        summary = compiler.summarize_attacks(stats)
+        self.assertEqual(len(summary), 1)
+        self.assertEqual(summary[0]["tentativas"], 5)
+        self.assertEqual(summary[0]["avaliadas"], 3)
+        self.assertEqual(summary[0]["sucessos"], 2)
+        self.assertEqual(summary[0]["parciais"], 1)
+        self.assertEqual(summary[0]["taxa_sucesso_pct"], 66.67)
+        self.assertEqual(summary[0]["taxa_direto_pct"], 50)
+        stats[1].update(conclusive=0, success=0, partial_success=0, success_rate=None)
+        self.assertIsNone(compiler.summarize_attacks(stats)[0]["taxa_sucesso_pct"])
+
+    def make_review_file(self, experiment, missing_note=False):
+        path = Path(experiment.export()["manual_reviews"])
+        with path.open(encoding="utf-8-sig", newline="") as stream:
+            reader = csv.DictReader(stream)
+            fields, rows = reader.fieldnames, list(reader)
+        for index, row in enumerate(rows):
+            row.update(verdict="fail" if row["condition"] == "direto" else "success",
+                       notes="" if missing_note and index == 0 else "Evidência de teste")
+        with path.open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(rows)
+        return path
+
+    def test_global_reviews_import_two_cases_and_do_not_overwrite_csvs(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
+            paths = []
+            for case in ("Q01", "Q02"):
+                experiment = Experiment(dict(CONFIG, attack=case), output_dir=directory)
+                experiment.run(backend=FakeBackend())
+                paths.append(self.make_review_file(experiment))
+            originals = {path: path.read_bytes() for path in paths}
+            report = import_review_files(directory)
+            self.assertEqual(len(report["files"]), 2)
+            self.assertEqual(report["errors"], [])
+            self.assertEqual(sum(row["updated"] for row in report["files"]), 4)
+            self.assertEqual({row["case_id"] for row in report["results"]}, {"Q01", "Q02"})
+            for path, content in originals.items():
+                self.assertEqual(path.read_bytes(), content)
+            reviews = {path: path.read_bytes() for path in Path(directory).glob("reviews-*.jsonl")}
+            repeated = import_review_files(directory)
+            self.assertEqual(sum(row["updated"] for row in repeated["files"]), 0)
+            for path, content in reviews.items():
+                self.assertEqual(path.read_bytes(), content)
+
+    def test_global_reviews_accept_empty_notes_for_all_runs(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
+            first = Experiment(dict(CONFIG, attack="Q01"), output_dir=directory)
+            first.run(backend=FakeBackend())
+            self.make_review_file(first, missing_note=True)
+            second = Experiment(dict(CONFIG, attack="Q02"), output_dir=directory)
+            second.run(backend=FakeBackend())
+            self.make_review_file(second)
+            report = import_review_files(directory)
+            self.assertEqual(report["errors"], [])
+            self.assertEqual(sum(row["updated"] for row in report["files"]), 4)
+            self.assertEqual({row["verdict"] for row in report["results"] if row["case_id"] == "Q01"}, {"fail", "success"})
+            self.assertEqual({row["verdict"] for row in report["results"] if row["case_id"] == "Q02"}, {"fail", "success"})
+            self.assertEqual(next(row["notes"] for row in report["results"]
+                                  if row["case_id"] == "Q01" and row["condition"] == "direto"), "")
+
+    def test_reviews_accept_csv_without_optional_notes_column(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
+            experiment = Experiment(dict(CONFIG, attack="Q01"), output_dir=directory)
+            experiment.run(backend=FakeBackend())
+            path = Path(experiment.export()["manual_reviews"])
+            with path.open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=["attempt_id", "verdict"])
+                writer.writeheader()
+                writer.writerows({"attempt_id": row["attempt_id"], "verdict": "success"}
+                                 for row in experiment.records)
+            report = import_review_files(directory)
+            self.assertEqual(report["errors"], [])
+            self.assertEqual([row["notes"] for row in report["results"]], ["", ""])
+
     def test_model_reused_without_network_or_second_constructor(self):
         revision = json.loads((BASE / "resultados/model-reference.json").read_text(encoding="utf-8"))["revision"]
         def construct(config, selected_revision, kernel):

@@ -1,8 +1,10 @@
 {
-  "version": "1.0",
-  "protocol": "verifiable_v1",
+  "version": "2.0",
+  "protocol": "verifiable_v2",
   "origin": "Synthetic instruction-following and prompt-injection cases authored by Codex for this portfolio. Not from Self-Reminder-Data.",
   "rows": 5,
-  "sha256": "5574470d0aad20135d6c3c85fcce37b3059285405b9902e6956b9d226128cd7b",
-  "file": "verifiable_attacks.bilingual.csv"
+  "sha256": "1e86542a991fe0ec8cd7e88fb2385de9b4c8c620e2a1c6215d4f489e8cdbb9ac",
+  "file": "verifiable_attacks.bilingual.csv",
+  "baseline": "Same adversarial goal without the strategy wrapper. For document injection, raw goal is inside the untrusted document.",
+  "benign_control": "Previous benign inputs retained in control_user_en/pt; not executed as the direct baseline."
 }

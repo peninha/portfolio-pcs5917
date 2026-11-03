@@ -35,6 +35,30 @@ STATS = GROUP + ["total", "pending", "inconclusive", "conclusive", "fail",
     "success_or_partial_rate", "attack_success_rate", "eligible_attacks",
     "baseline_violations", "baseline_unavailable", "paired_successes",
     "paired_attack_success_rate", "mean_seconds", "peak_allocated_gib"]
+SUMMARY = ["ataque", "estrategia", "idioma", "tentativas", "avaliadas", "sucessos",
+           "parciais", "taxa_sucesso_pct", "taxa_direto_pct", "configuracao"]
+
+
+def summarize_attacks(stats):
+    """Uma linha por ataque/estratégia/idioma/configuração, sem duplicar baseline."""
+    def identity(row):
+        return tuple(row.get(key, "") for key in
+                     ("evaluation_family", "case_id", "strategy_id", "config_id", "language"))
+    baselines = {identity(row): row for row in stats if row["condition"] == "direto"}
+    def percent(value):
+        return round(100 * value, 2) if value is not None else None
+    summary = []
+    for row in stats:
+        if row["condition"] != "ataque" or not row.get("case_id"):
+            continue
+        baseline = baselines.get(identity(row), {})
+        summary.append({"ataque": row["case_id"], "estrategia": row["template_name"],
+            "idioma": row["language"], "tentativas": row["total"], "avaliadas": row["conclusive"],
+            "sucessos": row["success"], "parciais": row["partial_success"],
+            "taxa_sucesso_pct": percent(row["success_rate"]),
+            "taxa_direto_pct": percent(baseline.get("success_rate")),
+            "configuracao": row["config_id"]})
+    return sorted(summary, key=lambda row: (row["ataque"], row["estrategia"], row["idioma"], row["configuracao"]))
 
 
 def normalize_record(record):
@@ -104,8 +128,6 @@ def compile_results(base=BASE):
     for row in rows:
         if row["verdict"] not in VERDICTS:
             raise ValueError(f"Avaliação inválida: {row['verdict']}")
-        if row["verdict"] != "pending" and not row.get("notes", "").strip():
-            raise ValueError("Avaliação sem justificativa")
         row["config_id"] = config_id(row)
     lookup = {row["attempt_id"]: row for row in rows}
     groups = defaultdict(list)
@@ -154,6 +176,7 @@ def compile_results(base=BASE):
             peak_allocated_gib=max(r["peak_allocated_gib"] for r in records)))
     write_csv(base / "tentativas-compiladas.csv", rows, FIELDS)
     write_csv(base / "estatisticas-compiladas.csv", stats, STATS)
+    write_csv(base / "resumo-ataques.csv", summarize_attacks(stats), SUMMARY)
     return rows, stats
 
 

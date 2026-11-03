@@ -19,7 +19,7 @@ import ataques_verificaveis as verifiable
 import compilar_resultados as compiler
 
 BASE = Path(__file__).resolve().parent
-_BACKEND = None
+_BACKEND = globals().get("_BACKEND")  # Recarregar o código não duplica o modelo na GPU.
 CONFIG_KEYS = {"strategy", "attack", "language", "repetitions", "seed", "model",
                "revision", "cache_dir", "max_input_tokens", "max_new_tokens",
                "temperature", "top_p"}
@@ -59,6 +59,85 @@ def windows_memory_info():
             "ram_available_gib": status.avail_phys / 2**30,
             "commit_limit_gib": status.total_commit / 2**30,
             "commit_available_gib": status.avail_commit / 2**30}
+
+
+def import_review_files(output_dir=BASE / "resultados"):
+    """Importa todos os CSVs de avaliação; valida cada arquivo antes de gravá-lo.
+
+    Não altera CSVs editados pelo aluno. Arquivos inválidos são relatados,
+    enquanto arquivos válidos independentes podem ser importados normalmente.
+    Pode ser usado sem Experiment ativo, sem modelo e após reiniciar o kernel.
+    """
+    output = Path(output_dir)
+    rows, _ = compiler.compile_results(output)
+    lookup = {row["attempt_id"]: row for row in rows}
+    reports, errors, selected = [], [], set()
+    run_ids = set()
+    for path in sorted(output.glob("avaliacoes-*.csv")):
+        run_id = path.stem.removeprefix("avaliacoes-")
+        run_ids.add(run_id)
+        changes, file_errors, seen = [], [], set()
+        pending, unchanged = 0, 0
+        try:
+            with path.open(encoding="utf-8-sig", newline="") as stream:
+                reader = csv.DictReader(stream, strict=True)
+                if not {"attempt_id", "verdict"}.issubset(reader.fieldnames or []):
+                    raise ValueError("Cabeçalho inválido: precisa de attempt_id e verdict; notes é opcional. Use vírgula como delimitador.")
+                reviews = list(reader)
+        except (ValueError, csv.Error, UnicodeError) as error:
+            file_errors.append({"file": path.name, "row": 1, "attempt_id": "", "csv_verdict": "", "reason": str(error)})
+            reviews = []
+        for number, review in enumerate(reviews, 2):
+            identity = (review.get("attempt_id") or "").strip()
+            verdict = (review.get("verdict") or "").strip()
+            notes = (review.get("notes") or "").strip()
+            reason = None
+            if identity in seen:
+                reason = "attempt_id duplicado neste CSV."
+            elif identity not in lookup:
+                reason = "attempt_id não encontrado nos registros de tentativas."
+            elif lookup[identity]["run_id"] != run_id:
+                reason = "A tentativa pertence a outra execução; confira o nome do arquivo e o ID."
+            elif None in review:
+                reason = "Há colunas excedentes; confira vírgulas e aspas no CSV."
+            seen.add(identity)
+            if reason is None:
+                selected.add(identity)
+                if verdict in {"", "pending"}:
+                    pending += 1
+                    continue
+                if verdict not in compiler.CONCLUSIVE | {"inconclusive"}:
+                    reason = "Rótulo inválido. Use fail, partial_success, success ou inconclusive."
+                elif (verdict, notes) == (lookup[identity]["verdict"], lookup[identity]["notes"]):
+                    unchanged += 1
+                else:
+                    changes.append({"attempt_id": identity, "verdict": verdict, "notes": notes,
+                                    "reviewer": "manual", "utc": datetime.now(timezone.utc).isoformat()})
+            if reason:
+                file_errors.append({"file": path.name, "row": number, "attempt_id": identity,
+                                    "csv_verdict": verdict, "reason": reason})
+        if not file_errors:
+            for review in changes:
+                append_jsonl(output / f"reviews-{run_id}.jsonl", review)
+                lookup[review["attempt_id"]].update(review)
+        errors.extend(file_errors)
+        cases = sorted({lookup[identity].get("case_id", "") for identity in seen if identity in lookup})
+        reports.append({"file": path.name, "cases": ", ".join(cases),
+            "status": "corrigir CSV" if file_errors else "importado" if changes else "sem alterações",
+            "updated": 0 if file_errors else len(changes), "unchanged": unchanged,
+            "pending": pending, "errors": len(file_errors)})
+    rows, stats = compiler.compile_results(output)
+    # Atualiza os retratos das execuções avaliadas, não apenas o último Experiment em memória.
+    for run_id in run_ids:
+        run_rows = [row for row in rows if row.get("run_id") == run_id]
+        if run_rows:
+            (output / f"results-{run_id}.json").write_text(
+                json.dumps(run_rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            compiler.write_csv(output / f"results-{run_id}.csv", run_rows, compiler.FIELDS)
+    columns = ("run_id", "case_id", "template_name", "language", "condition", "verdict", "notes")
+    return {"files": reports, "errors": errors,
+            "results": [{key: row.get(key, "") for key in columns} for row in rows if row["attempt_id"] in selected],
+            "statistics": stats}
 
 
 class Experiment:
@@ -171,7 +250,9 @@ class Experiment:
     def preview(self):
         parts = ["<p><strong>Prévia das mensagens que serão enviadas.</strong> Nenhuma inferência executada.</p>"]
         for trial in self.plan:
-            label = f"{trial['language'].upper()} · {trial['condition']} · repetição {trial['experiment']['repetition']}"
+            condition_label = ("direto — sem estratégia" if trial["condition"] == "direto"
+                               else f"com estratégia — {self.strategy['name']}")
+            label = f"{trial['language'].upper()} · {condition_label} · repetição {trial['experiment']['repetition']}"
             content = "\n\n".join(f"[{message['role']}]\n{message['content']}" for message in trial["messages"])
             parts.append(f"<details><summary>{html.escape(label)}</summary><pre>{html.escape(content)}</pre></details>")
         return "\n".join(parts)
@@ -263,11 +344,11 @@ class Experiment:
             seen.add(identity)
             if identity not in lookup:
                 raise ValueError("Avaliação não pertence a esta execução.")
-            verdict, notes = review["verdict"].strip(), review["notes"].strip()
+            verdict, notes = review["verdict"].strip(), (review.get("notes") or "").strip()
             if verdict in {"", "pending"}:
                 continue
-            if verdict not in compiler.CONCLUSIVE | {"inconclusive"} or not notes:
-                raise ValueError("Preencha um rótulo válido e uma justificativa para cada avaliação.")
+            if verdict not in compiler.CONCLUSIVE | {"inconclusive"}:
+                raise ValueError("Use fail, partial_success, success ou inconclusive. notes é opcional.")
             if (verdict, notes) != (lookup[identity]["verdict"], lookup[identity]["notes"]):
                 changes.append((identity, verdict, notes))
         for identity, verdict, notes in changes:
@@ -302,6 +383,7 @@ class Experiment:
                 compiler.write_csv(self._review_path(), review_rows, list(review_rows[0]))
         self.statistics = stats
         return {"directory": str(self.output), "attempts": str(self.output / "tentativas-compiladas.csv"),
+                "summary": str(self.output / "resumo-ataques.csv"),
                 "statistics": str(self.output / "estatisticas-compiladas.csv"),
                 "manual_reviews": str(self._review_path()) if self.run_id and self.family == "harmful_request" else None}
 
