@@ -72,6 +72,12 @@ Atividade no fórum da disciplina: discussão da notícia e do artigo sobre **Ni
 
 Notebook: [aula-02-llm-jailbreaks.ipynb](notebooks/aula-02-llm-jailbreaks.ipynb). Dependências: [requirements.txt](outros/aula-02-ataque-manual/requirements.txt).
 
+Estratégias de ataque: [CSV em português](outros/aula-02-ataque-manual/dados/jailbreak_prompts.pt-BR.csv), [tabela bilíngue EN/PT](outros/aula-02-ataque-manual/dados/jailbreak_prompts.bilingual.csv) e [procedência, tradução e validação](outros/aula-02-ataque-manual/dados/README.md). Os 75 IDs são preservados. O notebook usa a tabela bilíngue e uma única célula CONFIG para selecionar estratégia, ataque e idioma, tanto nos casos verificáveis quanto nos pedidos prejudiciais.
+
+Perguntas-alvo: [oito casos em inglês e português](outros/aula-02-ataque-manual/dados/attack_questions.bilingual.csv), com categorias e critérios de sucesso, para comparar pedidos diretos e ataques com os mesmos objetivos.
+
+Testes objetivos: [cinco casos verificáveis EN/PT](outros/aula-02-ataque-manual/dados/verifiable_attacks.bilingual.csv) e [protocolo](outros/aula-02-ataque-manual/dados/VERIFIABLE.md). O notebook combina o caso escolhido em CONFIG com a estratégia selecionada. A prévia não executa inferência; a célula Executar inicia baseline e ataque. Os casos V têm avaliação automática; as taxas são separadas dos pedidos prejudiciais e incluem comparação com baseline válida.
+
 Experimento preparado para execução local em RTX 4090 (24 GB), autorizada pelo professor conforme relato do aluno, com **DeepSeek-R1-Distill-Qwen-14B em NF4 de 4 bits**. O notebook compara pedidos diretos e ataques manuais baseados no [Self-Reminder-Data](https://github.com/yjw1029/Self-Reminder-Data/blob/master/data/jailbreak_prompts.csv), em português e inglês, e registra revisões, parâmetros, consumo de VRAM e avaliações humanas.
 
 **Status:** execução local iniciada; avaliações e discussão em andamento. Salvar as saídas, adicionar capturas em `images/aula-02/` e relatar aqui os resultados observados e suas limitações. As instruções de instalação estão no notebook.

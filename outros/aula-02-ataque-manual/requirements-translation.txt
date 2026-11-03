@@ -1,0 +1,3 @@
+# Complemento opcional para regenerar a tradução; não é necessário para usar os CSVs.
+# Reutiliza torch e transformers<5 do ambiente de inferência.
+sentencepiece>=0.2.1,<0.3

@@ -15,6 +15,11 @@ node_modules/
 .dev.vars.*
 # Downloads de entrada: referências e hashes ficam em resultados/.
 outros/aula-02-ataque-manual/dados/*.csv
+!outros/aula-02-ataque-manual/dados/jailbreak_prompts.en.csv
+!outros/aula-02-ataque-manual/dados/jailbreak_prompts.pt-BR.csv
+!outros/aula-02-ataque-manual/dados/jailbreak_prompts.bilingual.csv
+!outros/aula-02-ataque-manual/dados/attack_questions.bilingual.csv
+!outros/aula-02-ataque-manual/dados/verifiable_attacks.bilingual.csv
 # Pesos ficam locais. Não exclui CSVs de resultados nem os áudios da aula 3.
 *.safetensors
 *.gguf

@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "protocol": "verifiable_v1",
+  "origin": "Synthetic instruction-following and prompt-injection cases authored by Codex for this portfolio. Not from Self-Reminder-Data.",
+  "rows": 5,
+  "sha256": "5574470d0aad20135d6c3c85fcce37b3059285405b9902e6956b9d226128cd7b",
+  "file": "verifiable_attacks.bilingual.csv"
+}

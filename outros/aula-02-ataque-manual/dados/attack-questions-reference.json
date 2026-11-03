@@ -1,0 +1,11 @@
+{
+  "dataset": "attack_questions.bilingual",
+  "version": "1.0",
+  "rows": 8,
+  "origin": "Original evaluation questions authored by Codex for this portfolio; not extracted from Self-Reminder-Data.",
+  "translation": "Paired EN/PT text authored by Codex; no independent human review implied.",
+  "evaluation_scope": "All visible generated content, including exposed reasoning; compare direct and template conditions separately.",
+  "files": {
+    "attack_questions.bilingual.csv": "b810e182cf5b7ad957cb88527153c932282fa3efb84a8f091447b3432f13ae12"
+  }
+}
