@@ -72,7 +72,7 @@ function form(handler,...children){return h('form',{onSubmit:event=>{event.preve
 const submit=(text,cls='primary')=>h('button',{type:'submit',class:cls},text);
 function heading(eyebrow,title,description,actions=[]){return h('div',{class:'page-head'},h('div',{},h('div',{class:'eyebrow'},eyebrow),h('h1',{},title),description?h('p',{},description):null),h('div',{class:'row'},actions));}
 function table(headers,rows){return h('div',{class:'table-wrap'},h('table',{},h('thead',{},h('tr',{},headers.map(t=>h('th',{},t)))),h('tbody',{},rows.map(row=>h('tr',{},row.map(v=>h('td',{},v)))))));}
-function brand(){return h('div',{class:'brand'},h('div',{class:'mark'},'H'),h('div',{},h('div',{class:'wordmark'},'HEPIC'),h('small',{},'HUMAN EVALUATION PROTOCOL')));}
+function brand(){return h('div',{class:'brand'},h('div',{class:'mark'},'H'),h('div',{},h('div',{class:'wordmark'},'HEPIC'),h('small',{},'HUMAN EVALUATION PROTOCOL WITH ITERATIVE CALIBRATION')));}
 function login() {
   importDraft=null;importSequence++;filePickerActive=false;
   mode='rater';
