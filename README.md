@@ -119,11 +119,43 @@ Cada taxa por condição e idioma se baseia em **uma única tentativa**. Os resu
 
 ## 5. Aula 3 – Detecção de áudio falso
 
-Notebook: [análise exploratória com Librosa](notebooks/aula-03-deteccao-audio-falso.ipynb), preparado para execução local. Inclui integridade dos 288 áudios e exploração somente dos 192 de treino: escuta, formas de onda, espectrogramas, MFCCs e atributos espectrais. Os 96 áudios de teste ficam reservados para a avaliação final. Treinamento e avaliação dos classificadores serão acrescentados em uma próxima etapa.
+Nesta atividade, processei áudios com **Librosa** e comparei **SVM e Random Forest** para classificação binária de voz legítima (`bonafide`) e falsa (`spoof`). O experimento foi executado localmente, com processamento e treinamento na CPU.
 
-Material de apoio e instruções: [pasta da atividade](outros/aula-03-deteccao-audio-falso/README.md). Preparação dos dados: [script](outros/aula-03-deteccao-audio-falso/preparar_subconjunto.py) e [subconjunto de 288 áudios](outros/aula-03-deteccao-audio-falso/dados/subconjunto_288/README.md). As observações individuais podem ser registradas nas células de anotações do notebook.
+**Notebooks com saídas e análise individual:** [análise exploratória](notebooks/aula-03-deteccao-audio-falso.ipynb) e [classificação](notebooks/aula-03-classificador.ipynb).
 
-Referência: [ASVspoof no Kaggle](https://www.kaggle.com/datasets/ulianazb/asvspoof-2024).
+**Dados e protocolo.** Usei um [subconjunto de 288 áudios do ASVspoof 5](outros/aula-03-deteccao-audio-falso/dados/subconjunto_288/README.md), balanceado entre legítimos e falsos: 192 para treino e 96 para teste, sem locutores compartilhados. O treino contém ataques A01–A08; o teste utiliza a partição oficial `dev`, com ataques A09–A16. Os parâmetros foram escolhidos por validação cruzada em quatro partes somente no treino. A padronização da SVM foi ajustada dentro de cada rodada. IDs, caminhos, gênero e códigos de ataque não foram usados como atributos.
+
+**Exploração.** Os legítimos apresentaram duração mediana de **15,84 s**, contra **10,67 s** nos falsos, com sobreposição das distribuições. Também foram observadas diferenças em baixa energia e atributos espectrais, além de correlações fortes entre alguns atributos. O equilíbrio nas contagens não elimina esses possíveis vieses.
+
+![Duração, RMS global e indicador de saturação dos áudios de treino](images/aula-03/eda/02_qualidade_treino.png)
+
+**Comparação dos classificadores.** Foram avaliados três conjuntos: somente duração (1 atributo), médias e desvios dos MFCCs (40 atributos) e conjunto completo (57 atributos, incluindo duração). A tabela mostra a **acurácia balanceada**, que dá o mesmo peso às taxas de acerto das duas classes. A validação foi usada para seleção de parâmetros; o teste avalia métodos de falsificação desconhecidos no treino.
+
+| Atributos | Modelo | Validação média (%) | Teste (%) | Teste − validação (p.p.) |
+|---|---|---:|---:|---:|
+| Duração | SVM | 74,5 | 50,0 | −24,5 |
+| Duração | Random Forest | 69,3 | 50,0 | −19,3 |
+| MFCCs | SVM | 93,2 | 67,7 | −25,5 |
+| MFCCs | Random Forest | 89,1 | 74,0 | −15,1 |
+| Completo | SVM | **94,3** | 53,1 | −41,1 |
+| Completo | Random Forest | 91,7 | **78,1** | −13,5 |
+
+Diferenças calculadas antes do arredondamento. Resultados da [execução registrada](outros/aula-03-deteccao-audio-falso/resultados/classificacao/20261103T210643208200Z/execucao.json): [validação](outros/aula-03-deteccao-audio-falso/resultados/classificacao/20261103T210643208200Z/validacao_resumo.csv), [métricas de teste](outros/aula-03-deteccao-audio-falso/resultados/classificacao/20261103T210643208200Z/teste_metricas.csv) e [predições por arquivo](outros/aula-03-deteccao-audio-falso/resultados/classificacao/20261103T210643208200Z/teste_predicoes.csv).
+
+![Acurácia balanceada na validação e no teste para os seis experimentos](images/aula-03/classificacao/20261103T210643208200Z/03_validacao_vs_teste.png)
+
+**Principais resultados e limitações:**
+
+- A SVM completa liderou na validação, mas detectou somente **3 dos 48 falsos** no teste, reconhecendo os 48 legítimos. Seu resultado demonstra que o bom desempenho em métodos conhecidos não garantiu generalização.
+- A Random Forest completa apresentou o maior resultado observado no teste: **78,1%** de acurácia balanceada, detectando **32/48 falsos** e sinalizando incorretamente **5/48 legítimos**. Isso descreve esta seleção; não demonstra superioridade geral do método.
+- Os dois modelos baseados apenas em duração classificaram todos os áudios do teste como falsos. A associação útil na validação não sustentou uma separação entre classes no teste.
+- As diferenças entre métodos conhecidos e desconhecidos também envolvem novos locutores e outras condições dos dados. Com apenas seis áudios por ataque, os resultados por método são exploratórios. Melhorias propostas após observar o teste precisam de uma avaliação independente.
+
+![Taxa de detecção de falsos por ataque desconhecido, com seis áudios por ataque](images/aula-03/classificacao/20261103T210643208200Z/04_deteccao_por_ataque.png)
+
+O mapa acima mostra somente falsificações. A detecção de 100% pelos modelos de duração vem acompanhada de **100% de falsos positivos nos legítimos**, portanto não representa um detector eficaz.
+
+**Reprodução e referências:** [instruções e dependências](outros/aula-03-deteccao-audio-falso/README.md), [preparação do subconjunto](outros/aula-03-deteccao-audio-falso/preparar_subconjunto.py), [organização dos resultados](outros/aula-03-deteccao-audio-falso/resultados/README.md), [dataset no Kaggle](https://www.kaggle.com/datasets/ulianazb/asvspoof-2024) e [artigo do ASVspoof 5](https://doi.org/10.1016/j.csl.2025.101825).
 
 ## Disclaimer de Uso Ético
 

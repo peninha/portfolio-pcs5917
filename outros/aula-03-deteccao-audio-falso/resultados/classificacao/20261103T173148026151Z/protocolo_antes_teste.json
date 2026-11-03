@@ -1,0 +1,200 @@
+{
+  "run_id": "20261103T173148026151Z",
+  "fixed_at_utc": "2026-11-03T17:32:09.286714+00:00",
+  "config": {
+    "seed": 42,
+    "n_splits": 4,
+    "n_jobs": 2
+  },
+  "audio_config": {
+    "seed": 42,
+    "sr": 16000,
+    "n_fft": 512,
+    "hop_length": 160,
+    "n_mels": 64,
+    "n_mfcc": 20,
+    "silence_dbfs": -40,
+    "bonafide_id": null,
+    "spoof_id": null
+  },
+  "feature_sets": {
+    "duracao": [
+      "duration_s"
+    ],
+    "mfcc": [
+      "mfcc_01_mean",
+      "mfcc_01_std",
+      "mfcc_02_mean",
+      "mfcc_02_std",
+      "mfcc_03_mean",
+      "mfcc_03_std",
+      "mfcc_04_mean",
+      "mfcc_04_std",
+      "mfcc_05_mean",
+      "mfcc_05_std",
+      "mfcc_06_mean",
+      "mfcc_06_std",
+      "mfcc_07_mean",
+      "mfcc_07_std",
+      "mfcc_08_mean",
+      "mfcc_08_std",
+      "mfcc_09_mean",
+      "mfcc_09_std",
+      "mfcc_10_mean",
+      "mfcc_10_std",
+      "mfcc_11_mean",
+      "mfcc_11_std",
+      "mfcc_12_mean",
+      "mfcc_12_std",
+      "mfcc_13_mean",
+      "mfcc_13_std",
+      "mfcc_14_mean",
+      "mfcc_14_std",
+      "mfcc_15_mean",
+      "mfcc_15_std",
+      "mfcc_16_mean",
+      "mfcc_16_std",
+      "mfcc_17_mean",
+      "mfcc_17_std",
+      "mfcc_18_mean",
+      "mfcc_18_std",
+      "mfcc_19_mean",
+      "mfcc_19_std",
+      "mfcc_20_mean",
+      "mfcc_20_std"
+    ],
+    "completo": [
+      "rms_mean",
+      "rms_std",
+      "zcr_mean",
+      "zcr_std",
+      "centroid_hz_mean",
+      "centroid_hz_std",
+      "bandwidth_hz_mean",
+      "bandwidth_hz_std",
+      "rolloff_hz_mean",
+      "rolloff_hz_std",
+      "flatness_mean",
+      "flatness_std",
+      "mfcc_01_mean",
+      "mfcc_01_std",
+      "mfcc_02_mean",
+      "mfcc_02_std",
+      "mfcc_03_mean",
+      "mfcc_03_std",
+      "mfcc_04_mean",
+      "mfcc_04_std",
+      "mfcc_05_mean",
+      "mfcc_05_std",
+      "mfcc_06_mean",
+      "mfcc_06_std",
+      "mfcc_07_mean",
+      "mfcc_07_std",
+      "mfcc_08_mean",
+      "mfcc_08_std",
+      "mfcc_09_mean",
+      "mfcc_09_std",
+      "mfcc_10_mean",
+      "mfcc_10_std",
+      "mfcc_11_mean",
+      "mfcc_11_std",
+      "mfcc_12_mean",
+      "mfcc_12_std",
+      "mfcc_13_mean",
+      "mfcc_13_std",
+      "mfcc_14_mean",
+      "mfcc_14_std",
+      "mfcc_15_mean",
+      "mfcc_15_std",
+      "mfcc_16_mean",
+      "mfcc_16_std",
+      "mfcc_17_mean",
+      "mfcc_17_std",
+      "mfcc_18_mean",
+      "mfcc_18_std",
+      "mfcc_19_mean",
+      "mfcc_19_std",
+      "mfcc_20_mean",
+      "mfcc_20_std",
+      "low_energy_fraction",
+      "duration_s",
+      "peak",
+      "rms_global",
+      "near_clip_fraction"
+    ]
+  },
+  "positive_class": "spoof",
+  "selection_metric": "balanced_accuracy",
+  "validation": "4 folds stratified by attack/bonafide; speaker-disjoint",
+  "development_winner": "completo__SVM",
+  "selected_parameters": {
+    "duracao__SVM": {
+      "model__C": 1,
+      "model__gamma": 0.01
+    },
+    "duracao__RandomForest": {
+      "max_depth": 5,
+      "min_samples_leaf": 6
+    },
+    "mfcc__SVM": {
+      "model__C": 10,
+      "model__gamma": "scale"
+    },
+    "mfcc__RandomForest": {
+      "max_depth": null,
+      "min_samples_leaf": 1
+    },
+    "completo__SVM": {
+      "model__C": 1,
+      "model__gamma": "scale"
+    },
+    "completo__RandomForest": {
+      "max_depth": null,
+      "min_samples_leaf": 1
+    }
+  },
+  "grids": {
+    "SVM": {
+      "model__C": [
+        0.1,
+        1,
+        10
+      ],
+      "model__gamma": [
+        "scale",
+        0.01,
+        0.1
+      ]
+    },
+    "RandomForest": {
+      "max_depth": [
+        null,
+        5
+      ],
+      "min_samples_leaf": [
+        1,
+        3,
+        6
+      ]
+    }
+  },
+  "python": "3.14.10",
+  "packages": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "2.3.3",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.18.1",
+    "numba": "0.68.1",
+    "matplotlib": "3.11.2",
+    "seaborn": "0.13.2"
+  },
+  "input_sha256": {
+    "outros\\aula-03-deteccao-audio-falso\\dados\\subconjunto_288\\treino_192.csv": "e5d9f9d57c4522dd663482c1f1d53d9c0b565037c4ba9ae50f78574f271053cb",
+    "outros\\aula-03-deteccao-audio-falso\\resultados\\eda\\execucao.json": "619e3a9c18f46dfec058d07406ef1e39431068209833cc8efe0f6b5a54065bf3",
+    "outros\\aula-03-deteccao-audio-falso\\resultados\\eda\\atributos_treino.csv": "80453f6d740abfbffece5071f281eec6b720a33074dd5efe8c463115cfdbd3eb",
+    "outros\\aula-03-deteccao-audio-falso\\resultados\\eda\\qualidade_treino.csv": "90267c2e49c1f4098ad92c89a3854baad245bf7f2541699e74c748cca0535d28",
+    "outros\\aula-03-deteccao-audio-falso\\atributos_audio.py": "b00902333b0450db07cb5a319830d63d3288aa278f57e3642341d5fc60c68b58"
+  }
+}
