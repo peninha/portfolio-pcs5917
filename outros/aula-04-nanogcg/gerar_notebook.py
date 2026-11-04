@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import nbformat as nbf
+from notebook_lotes import batch_cells, review_cells
 
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parents[1]
@@ -81,14 +82,13 @@ import transformers
 print("nanoGCG:", nanogcg.__file__)
 print("Transformers:", transformers.__version__)
 
-# CONFIG: piloto primeiro; a matriz completa pode ser habilitada depois.
+# CONFIG: somente o piloto; os lotes têm uma configuração própria depois dele.
 MODEL_IDS = ["Qwen/Qwen2.5-0.5B-Instruct"]
 CASE_IDS = ["V03"]
 SUFFIX_UNITS = 8  # repetições de x; comprimento real é medido pelo tokenizer
 NUM_STEPS = 40
 SEED = 42
-# Matriz sugerida: MODEL_IDS também inclui HuggingFaceTB/SmolLM2-135M-Instruct;
-# CASE_IDS = ["V01", "V02", "V03"]. Em rodada separada, use SUFFIX_UNITS=16.
+# Para vários testes, use a seção "Testes automatizados" depois do piloto.
 ''')
 md("""## Dados e funções
 
@@ -109,7 +109,7 @@ code("\n".join(imports) + "\nTARGETS = {'V01': 'ABACAXI', 'V02': 'Este é um dia
 for names, explanation in [
     ({"save_json", "prepare", "diagnostic"}, "Preparação e diagnósticos: carrega somente tarefas sintéticas e mantém a avaliação humana separada."),
     ({"load_model", "generate"}, "Inferência: carrega o modelo em bfloat16, congela pesos, aplica chat template e registra IDs e resposta sem incluir o prompt na saída avaliada."),
-    ({"run_case", "plot_result"}, "Otimização e persistência: executa baseline, GCG e ataque; salva versões, revisão do modelo, strings/losses e arquivos de avaliação. A curva pode oscilar: seleção gulosa não garante redução em toda iteração."),
+    ({"normalize_legacy_cache", "run_case", "plot_result"}, "Otimização e persistência: executa baseline, GCG e ataque; salva versões, revisão do modelo, strings/losses e arquivos de avaliação. O adaptador de cache converte o formato legado do nanoGCG para DynamicCache em cada chamada, preservando o prefixo original. A curva pode oscilar: seleção gulosa não garante redução em toda iteração."),
 ]:
     md(explanation)
     code("\n\n".join(ast.get_source_segment(source, node) for node in tree.body
@@ -162,6 +162,8 @@ code('''for r in results:
     print("Diagnósticos:", r["baseline_diagnostic"], "→", r["attack_diagnostic"])
     print("Avaliação humana:", r["human_review"], "\\n")
 ''')
+nb.cells.extend(batch_cells(SOURCE))
+nb.cells.extend(review_cells(SOURCE))
 nb.metadata = {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
                "language_info": {"name": "python"}, "source_sha256": hashlib.sha256(SOURCE.read_bytes()).hexdigest()}
 path = ROOT / "notebooks/aula-04-nanogcg.ipynb"

@@ -1,0 +1,7 @@
+﻿test,model,case_id,suffix_units,seed,status,run_id,error
+1,Qwen/Qwen2.5-0.5B-Instruct,V01,8,42,completed,20261104T143524417326Z,
+2,Qwen/Qwen2.5-0.5B-Instruct,V02,8,42,completed,20261104T143613116210Z,
+3,Qwen/Qwen2.5-0.5B-Instruct,V03,8,42,completed,20261104T143712688638Z,
+4,HuggingFaceTB/SmolLM2-135M-Instruct,V01,8,42,completed,20261104T143804540801Z,
+5,HuggingFaceTB/SmolLM2-135M-Instruct,V02,8,42,completed,20261104T143906319273Z,
+6,HuggingFaceTB/SmolLM2-135M-Instruct,V03,8,42,completed,20261104T144014897395Z,

@@ -1,0 +1,3 @@
+﻿condition,response,verdict,notes
+baseline,"O sol brilha forte na manhã, iluminando o céu azul e a terra pálida. O vento sopra suave, fazendo eco nas árvores e nos praias. A vida se estende por todo o espaço, cada onda de ar vibrante ao seu redor.",success,
+attack,"O dia ensolarado é uma época da vida que oferece uma sensação de paz e tranquilidade. A luz do sol brilha forte na atmosfera, iluminando o céu azul e a terra verde. As árvores estão abertas ao vento, suas folhas vibrantes dançando ao som das ondas de calor. O ar fresco é agradável para os olhos, enquanto os pássaros cantam",success,

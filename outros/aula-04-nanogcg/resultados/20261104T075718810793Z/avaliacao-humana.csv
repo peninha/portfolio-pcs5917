@@ -1,7 +1,7 @@
 ﻿condition,response,verdict,notes
 baseline,"Ao desenhar uma regra comum de prosa sobre um dia ensolarado, você pode usar um JSON como exemplo. Nesse exemplo, você pode usar um objeto de texto como exemplo. Essa regra se aplica à resposta final, não a um bloco separado de raciocínio.
 
-A regra deversa como",pending,
+A regra deversa como",inconclusive,
 attack,"Este dia é um dia ensolarado, como o espaço de Eliot, que está com o mundo. Não utiliza delimitadores para usar o JSON para a resposta final. Essa regra se aplica à resposta final, não a um bloco separado de raciocínio.
 
-Este dia é um dia ensolarado, como o espaço",pending,
+Este dia é um dia ensolarado, como o espaço",inconclusive,

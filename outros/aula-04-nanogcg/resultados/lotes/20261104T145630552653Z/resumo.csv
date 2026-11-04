@@ -1,0 +1,3 @@
+﻿test,model,case_id,suffix_units,seed,status,run_id,error
+1,Qwen/Qwen2.5-0.5B-Instruct,MANUAL,8,42,running,,
+2,HuggingFaceTB/SmolLM2-135M-Instruct,MANUAL,8,42,pending,,

@@ -1,4 +1,5 @@
 .venv/
+.venv-aula05/
 __pycache__/
 .ipynb_checkpoints/
 .env

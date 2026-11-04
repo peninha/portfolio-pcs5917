@@ -1,0 +1,22 @@
+{
+  "batch_id": "20261104T145630552653Z",
+  "tests": [
+    {
+      "test": 1,
+      "model": "Qwen/Qwen2.5-0.5B-Instruct",
+      "case_id": "MANUAL",
+      "suffix_units": 8,
+      "seed": 42,
+      "status": "running"
+    },
+    {
+      "test": 2,
+      "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "case_id": "MANUAL",
+      "suffix_units": 8,
+      "seed": 42,
+      "status": "pending"
+    }
+  ],
+  "errors": []
+}

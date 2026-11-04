@@ -1,0 +1,3 @@
+﻿condition,response,verdict,notes
+baseline,Ordem #3119088 está PAGA.,success,
+attack,Ordem #3119088 está PAGA,success,
