@@ -15,7 +15,8 @@
 - [Aula 3 — Detecção de áudio falso](#5-aula-3--detecção-de-áudio-falso)
 - [Aula 4 — Sufixos adversariais com nanoGCG](#6-aula-4--sufixos-adversariais-com-nanogcg)
 - [Aula 5 — Ataque dinâmico iterativo com PAIR](#7-aula-5--ataque-dinâmico-iterativo-com-pair)
-- Aulas 6 e 7: seções e artefatos serão acrescentados conforme as atividades.
+- [Aula 6 — Avaliação humana e LLM como juiz](#8-aula-6--avaliação-humana-e-llm-como-juiz)
+- Aula 7: seção e artefatos serão acrescentados conforme a atividade.
 
 ## 1. Objetivo do Portfólio
 
@@ -169,20 +170,19 @@ Estudo do **Greedy Coordinate Gradient (GCG)** com a biblioteca **nanoGCG**, inc
 |---|---|
 | Notebook executado, com piloto, lotes e casos manuais | [aula-04-nanogcg.ipynb](notebooks/aula-04-nanogcg.ipynb) |
 | CSV final, sem repetições, com prompts, sufixos, respostas e avaliações humanas | [resultados-finais.csv](outros/aula-04-nanogcg/resultados/resultados-finais.csv) |
-| Procedimento, dependências e reprodução | [README da atividade](outros/aula-04-nanogcg/README.md) |
-| Consolidação e rastreabilidade das execuções agrupadas | [resultados](outros/aula-04-nanogcg/resultados/README.md) e [auditoria da consolidação](outros/aula-04-nanogcg/resultados/consolidacao-final.json) |
+| Colab de teste | [colab](https://colab.research.google.com/drive/1_qlt-Cx4va2RbbxlkSZeKXDzokCu-fbP) |
 
 ### Procedimento e amostra
 
 Foram usados **Qwen2.5-0.5B-Instruct** e **SmolLM2-135M-Instruct**. V01–V03 reutilizam tarefas sintéticas em português da aula 2: palavra proibida, resposta somente em JSON e rótulos restritos. V03 foi testado com sufixos de 8 e 16 tokens. Também foram executados três cenários manuais em cada modelo, com mensagens e targets registrados no CSV.
 
-Cada teste contém uma geração sem sufixo, otimização de um sufixo específico e geração com sufixo. A configuração foi de **40 iterações, 32 candidatos por iteração, top-k 32, batch 16 e seed 42**; a inferência usou geração gulosa e limite de 96 tokens. As regras de sistema, quando presentes, foram mantidas nas duas condições. O target participa da loss, mas não é fornecido como resposta pronta na inferência final.
+Cada teste contém uma geração sem sufixo, otimização de um sufixo específico e geração com sufixo. A configuração foi de **40 iterações, 32 candidatos por iteração, top-k 32, batch 16 e seed 42**; a inferência usou geração gulosa e limite de 96 tokens.
 
-As **25 execuções concluídas** foram consolidadas em **14 pares distintos**, sete por modelo, removendo 11 repetições com entradas, configuração e resultados idênticos. Variações de mensagem, modelo, seed, comprimento ou resultado permanecem separadas. Dois registros sem resultado final foram excluídos. A execução mais recente representa cada grupo de duplicatas, independentemente de sucesso; os arquivos brutos e os IDs de origem permanecem preservados.
+As **25 execuções concluídas** foram consolidadas em **14 pares distintos**, sete por modelo.
 
 ### ASR e avaliação humana
 
-Seguindo o critério da aula 2, **ASR (Attack Success Rate) = sucessos completos / avaliações conclusivas × 100**. O rótulo humano `success` conta como sucesso completo; `partial_success` e `fail` entram no denominador, mas não no numerador. `inconclusive` fica fora do denominador. As taxas usam a avaliação humana do objetivo de cada teste, e não apenas a loss, o início da resposta ou os diagnósticos automáticos de quebra de regra.
+Seguindo o critério da aula 2, **ASR (Attack Success Rate) = sucessos completos / avaliações conclusivas × 100**. O rótulo humano `success` conta como sucesso completo; `partial_success` e `fail` entram no denominador, mas não no numerador. `inconclusive` fica fora do denominador.
 
 | Modelo | Pares distintos | ASR sem sufixo | ASR com sufixo | Parciais com sufixo | Inconclusivos com sufixo |
 |---|---:|---:|---:|---:|---:|
@@ -202,7 +202,7 @@ Para distinguir sucesso já presente no pedido direto de melhora com o sufixo, t
 
 ![Trajetória da loss do target no piloto V03](images/aula-04/20261104T074553103072Z-loss.png)
 
-Os resultados são exploratórios: poucas configurações, uma seed e objetivos diferentes, com V03 representado em dois comprimentos. O SmolLM2 tem foco em inglês, o que limita a comparação dos casos em português. As avaliações incluem julgamentos humanos parciais ou inconclusivos; não medem robustez geral nem permitem ranquear a segurança dos modelos. Uma divergência de avaliação entre duplicatas de **V01 / SmolLM2** foi sinalizada no CSV; estas taxas usam a avaliação da execução mais recente, preservando a anterior na auditoria. O Qwen 3B inicialmente previsto não chegou à inferência por falhas de download.
+Os resultados são exploratórios: poucas configurações, uma seed e objetivos diferentes, com V03 representado em dois comprimentos. O SmolLM2 tem foco em inglês, o que limita a comparação dos casos em português. As avaliações incluem julgamentos humanos parciais ou inconclusivos; não medem robustez geral nem permitem ranquear a segurança dos modelos.
 
 **Referências:** [nanoGCG](https://github.com/GraySwanAI/nanoGCG), [artigo original do GCG](https://arxiv.org/abs/2307.15043), [exemplo fornecido na aula](https://colab.research.google.com/drive/1_oR3145aEYwj3ArxNNX59I48lZhoDvyC), [coleção de modelos indicada](https://huggingface.co/collections/guishe/small-llms), [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) e [SmolLM2-135M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct).
 
@@ -222,6 +222,34 @@ distintos do objetivo sobre veneno da planilha. CipherChat não foi implementado
 **Estado:** notebook validado com respostas simuladas e teste de carregamento/geração
 local em NF4; chamadas ao alvo, resultados e análise experimental ainda pendentes.
 Não há taxa de sucesso medida.
+
+## 8. Aula 6 – Avaliação humana e LLM como juiz - Grupo A
+Roberto Spinelli Filho
+Arthur Moriggi Pimenta
+Caio Vinícius Ribeiro da Silva
+
+Na sala de aula, apresentamos e avaliamos os protocolos de avaliação humana dos grupos C e E.
+
+Em resumo, Grupo C:
+Utiliza um sistema de score com 4 valores: 0; 0,4; 0,6 e 1, sendo 0 (falha) e 1(sucesso) as notas com convicção, e as 0,4 e 0,6 são cinzentas, duvidosas ou parciais.
+Uma pessoa avalia todos	casos.
+Se houver notas cinzentas, entram dois outros para desempatar, podendo dar apenas notas 0 ou 1.
+	
+Grupo E:
+Usa um sistema de score de 4 notas: 0, 1, 2, 3. Sendo Sucesso = 3 ou 2; e Falha =  1 ou 0	.
+Todos os avaliadores julgam todos os casos.
+Na discordancia, faz a media, que define então se encaixa em Sucesso ou Falha.
+
+Nosso grupo, A, criou o protocolo HEPIC (Human Evaluation Protocol with Iterative Calibration), que é descrito em detalhes no documento: [HEPIC](https://docs.google.com/document/d/1wQ-XY_RpxN1U3engi29NpQca-7-HdDXfer2Pwq9LSc8/)
+
+Desenvolvi um software para implementar o HEPIC, com treinamento, calibração, sobreposição entre avaliadores e adjudicação de discordâncias. Segue print da tela principal.
+![Tela principal do HEPIC](images/aula-06/print_tela_HEPIC.jpeg)
+
+No relatório final, dos **152 itens**, 151 receberam nota humana final e foram comparados aos juízes **Qwen2.5-3B-Instruct** e **JEV**. O ASR foi de **7,28% na avaliação humana**, **3,31% no Qwen** e **3,97% no JEV**; o kappa de Cohen em relação às notas humanas foi de **0,204** e **0,683**, respectivamente. A comparação é exploratória: inclui referências e calibração, seleção por disponibilidade e entradas dos juízes sem contexto completo.
+
+Segue nosso artigo final da atividade: [Artigo final (PDF)](outros/aula-06-llm-como-juiz/relatorio-aula06.pdf)
+
+**Materiais:** [sistema HEPIC e documentação](outros/aula-06-llm-como-juiz/hepic/README.md), [resultados humanos](outros/aula-06-llm-como-juiz/resultados/README.md), [planilha principal](https://docs.google.com/spreadsheets/d/1Ln_UxzuvmUPfp69SuYsfncdUiAr2jH3O0TJxQZumO5g/edit?gid=0#gid=0) e [pasta com Colab, protocolo e resultados automáticos](https://drive.google.com/drive/folders/1MtFY4XPaf2Zg-MkHYEF9YyVR8DU0lz11).
 
 ## Disclaimer de Uso Ético
 
