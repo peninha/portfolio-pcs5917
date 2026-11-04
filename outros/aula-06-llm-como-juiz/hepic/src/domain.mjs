@@ -251,7 +251,7 @@ export function command(s,actor,cmd,now=new Date().toISOString()) {
       admin();must(c.phase!=='setup','O ciclo já está em preparação.');
       // A full new cycle preserves all old ratings and assignments for audit/export.
       for(const [id,decision] of Object.entries(c.adjudications))if(cmd.promoteAdjudications&&decision.outcome!=='inconclusive') s.references[id]=decision;
-      s.archives.push({...structuredClone(c),archivedAt:now,referenceVersion:s.referenceVersion});
+      s.archives.push({...structuredClone(c),itemIds:s.items.map(i=>i.id),archivedAt:now,referenceVersion:s.referenceVersion});
       s.referenceVersion++;rememberReferences(s,now);s.cycle=newCycle(c.config);
       s.cycle.inconclusives=structuredClone(c.inconclusives??{});break;
     }
@@ -286,6 +286,19 @@ export function view(s,actor,adminMode=false) {
   return data;
 }
 
+function exportItemResult(s,c,itemId,references) {
+  if(c.evaluationIds.includes(itemId)||c.inconclusives?.[itemId])return evaluationResult({...s,cycle:c},itemId);
+  const round=c.rounds.filter(r=>r.itemIds.includes(itemId)).at(-1);
+  if(round) {
+    const tasks=c.assignments.filter(a=>a.itemId===itemId&&a.phase==='calibration'&&a.round===round.number);
+    const scores=numericScores(tasks),decision=round.decisions[itemId],flagged=tasks.filter(a=>a.outcome==='inconclusive').length;
+    const status=tasks.some(a=>!submitted(a))?'pending':decision?.outcome==='inconclusive'?'inconclusive':decision?'adjudicated':!round.completedAt?'pending':round.failed.includes(itemId)?'adjudication':'agreement';
+    return {status,ratings:scores.length,assigned:tasks.length,flagged,disagreement:disagreement(scores),finalScore:status==='adjudicated'?decision.score:status==='agreement'?median(scores):null,decision};
+  }
+  const decision=references[itemId];
+  return {status:decision?'reference':'unused',ratings:0,assigned:0,flagged:0,disagreement:null,finalScore:decision?.score??null,decision};
+}
+
 export function exportCSV(s,kind='results') {
   const cycles=[...s.archives,s.cycle];
   if(kind==='ratings') {
@@ -293,10 +306,26 @@ export function exportCSV(s,kind='results') {
     for(const c of cycles)for(const a of c.assignments)if(submitted(a)) rows.push([c.id,a.phase,a.round,a.itemId,a.userId,s.users.find(u=>u.id===a.userId)?.name,a.version,a.score,a.justification,a.submittedAt,a.outcome??'scored']);
     return csv(rows);
   }
-  const rows=[['cycle','item_id','method','target','language','status','n_ratings','disagreement','final_score','adjudicated','threshold','seed','author','previous_result','objective','prompt','response','source','decision_outcome','researcher_observation','decision_phase','n_inconclusive_reports']];
-  for(const c of cycles) for(const id of resultIds(c)) {
-    const i=s.items.find(i=>i.id===id),r=evaluationResult({...s,cycle:c},id);
-    rows.push([c.id,id,i.method,i.target,i.language,r.status,r.ratings,r.disagreement,r.finalScore,Boolean(c.adjudications[id]),c.config.threshold,c.config.seed,i.author,i.previous,i.objective,i.prompt,i.response,i.source,r.decision?.outcome??(r.decision?'scored':''),r.decision?.justification??'',c.inconclusives?.[id]?.phase??'evaluation',r.flagged]);
+  const rows=[['cycle','item_id','method','target','language','status','n_ratings','disagreement','final_score','adjudicated','threshold','seed','author','previous_result','objective','prompt','response','source','decision_outcome','researcher_observation','decision_phase','n_inconclusive_reports','item_phase','is_reference','is_calibration','is_evaluation','calibration_rounds','n_assigned','n_submitted','ratings_json','calibration_history_json','reference_history_json','reference_score','reference_observation','researcher_decisions_json']];
+  for(const [index,c] of cycles.entries()) {
+    const endVersion=c.referenceVersion??s.referenceVersion,startVersion=index?cycles[index-1].referenceVersion+1:1;
+    const history=(s.referenceHistory??[]).filter(h=>h.version>=startVersion&&h.version<=endVersion);
+    const references=c===s.cycle?s.references:[...(s.referenceHistory??[])].reverse().find(h=>h.version<=endVersion)?.references??{};
+    // New archives record their item membership; legacy archives use only identifiable items.
+    const ids=c===s.cycle?s.items.map(i=>i.id):c.itemIds??[...new Set([...c.assignments.map(a=>a.itemId),...Object.keys(references),...Object.keys(c.inconclusives??{})])];
+    for(const id of ids) {
+      const i=s.items.find(i=>i.id===id);if(!i)continue;
+      const rounds=c.rounds.filter(r=>r.itemIds.includes(id)),assignments=c.assignments.filter(a=>a.itemId===id);
+      const referenceHistory=history.filter(h=>h.references[id]).map(h=>({version:h.version,at:h.at,...h.references[id]}));
+      const isReference=Boolean(references[id]||referenceHistory.length),isCalibration=rounds.length>0,isEvaluation=c.evaluationIds.includes(id);
+      const phase=isEvaluation?'evaluation':isCalibration?'calibration':isReference||c.inconclusives?.[id]?.phase==='reference'?'reference':'unused';
+      const r=exportItemResult(s,c,id,references),decisions=[];
+      for(const round of rounds)if(round.decisions[id])decisions.push({phase:'calibration',round:round.number,...round.decisions[id]});
+      if(c.adjudications[id])decisions.push({phase:'evaluation',...c.adjudications[id]});
+      if(c.inconclusives?.[id]&&!decisions.some(d=>d.phase===c.inconclusives[id].phase&&d.at===c.inconclusives[id].at))decisions.push(c.inconclusives[id]);
+      const calibrationHistory=rounds.map(round=>({round:round.number,referenceVersion:round.referenceVersion,completedAt:round.completedAt??null,requiresReview:round.completedAt?round.failed.includes(id):null,disagreement:disagreement(numericScores(assignments.filter(a=>a.phase==='calibration'&&a.round===round.number))),decision:round.decisions[id]??null}));
+      rows.push([c.id,id,i.method,i.target,i.language,r.status,r.ratings,r.disagreement,r.finalScore,Boolean(c.adjudications[id]||rounds.some(round=>round.decisions[id])),c.config.threshold,c.config.seed,i.author,i.previous,i.objective,i.prompt,i.response,i.source,r.decision?.outcome??(r.decision?'scored':''),r.decision?.justification??'',phase,r.flagged,phase,isReference,isCalibration,isEvaluation,rounds.map(r=>r.number).join(';'),assignments.length,assignments.filter(submitted).length,JSON.stringify(assignments.map(a=>({...a,evaluator:s.users.find(u=>u.id===a.userId)?.name??a.userId}))),JSON.stringify(calibrationHistory),JSON.stringify(referenceHistory),references[id]?.score??null,references[id]?.justification??'',JSON.stringify(decisions)]);
+    }
   }
   return csv(rows);
 }

@@ -14,6 +14,39 @@ function study({n=40,threshold=.33,k=3}={}) {
 function train(t){t.act('startTraining');for(const u of raters(t.s))t.act('acknowledge',{version:t.s.referenceVersion},u);t.act('startCalibration');}
 function rateCalibration(t,scoreFor=()=>0){for(const a of [...t.s.cycle.assignments].filter(a=>a.phase==='calibration'&&a.round===t.s.cycle.rounds.at(-1).number&&a.score===null))t.act('submit',{assignmentId:a.id,score:scoreFor(a),justification:'Justificativa sintética.'},t.s.users.find(u=>u.id===a.userId));}
 
+function exportedItems(s){const [headers,...rows]=parseCSV(exportCSV(s));return rows.map(row=>Object.fromEntries(headers.map((h,i)=>[h,row[i]])));}
+
+test('exportação inclui toda a base e identifica referências, calibração, avaliação e itens não utilizados',()=>{
+  const t=study({n:152,k:9});t.act('reference',{itemId:'case-1',score:1});t.act('reference',{itemId:'case-2',outcome:'inconclusive',justification:'Entrada incompleta.'});
+  let rows=exportedItems(t.s);assert.equal(rows.length,152);assert.equal(rows.find(r=>r.item_id==='case-151').item_phase,'unused');
+  assert.equal(rows.find(r=>r.item_id==='case-0').final_score,'0');assert.equal(rows.find(r=>r.item_id==='case-0').n_ratings,'0');
+  train(t);rateCalibration(t);t.act('startEvaluation');rows=exportedItems(t.s);
+  assert.equal(rows.length,152);assert.equal(new Set(rows.map(r=>r.item_id)).size,152);
+  assert.equal(rows.filter(r=>r.item_phase==='reference').length,3);assert.equal(rows.filter(r=>r.item_phase==='calibration').length,9);assert.equal(rows.filter(r=>r.item_phase==='evaluation').length,140);
+  const calibration=rows.find(r=>r.item_phase==='calibration');assert.equal(calibration.final_score,'0');assert.equal(calibration.status,'agreement');assert.equal(calibration.n_submitted,'3');
+  assert.equal(JSON.parse(calibration.ratings_json).length,3);assert.equal(JSON.parse(calibration.calibration_history_json)[0].requiresReview,false);
+  const inconclusive=rows.find(r=>r.item_id==='case-2');assert.equal(inconclusive.final_score,'');assert.equal(inconclusive.status,'inconclusive');assert.equal(inconclusive.is_reference,'false');
+  const pending=rows.find(r=>r.item_phase==='evaluation');assert.equal(pending.final_score,'');assert.equal(pending.status,'pending');assert(JSON.parse(pending.ratings_json).every(a=>a.score===null&&a.evaluator));
+});
+
+test('exportação preserva calibração discordante quando item vira referência de treinamento',()=>{
+  const t=study({k:1});train(t);rateCalibration(t,a=>a.userId==='c'?2:0);
+  const id=t.s.cycle.rounds[0].failed[0];let row=exportedItems(t.s).find(r=>r.item_id===id);
+  assert.equal(row.status,'adjudication');assert.equal(row.final_score,'');
+  t.act('adjudicate',{itemId:id,score:1,justification:'Critério revisto.'});
+  row=exportedItems(t.s).find(r=>r.item_id===id);assert.equal(row.item_phase,'calibration');assert.equal(row.is_calibration,'true');assert.equal(row.is_reference,'true');
+  assert.equal(row.final_score,'1');assert.equal(row.reference_score,'1');assert.equal(row.disagreement,String(2/3));assert.equal(row.adjudicated,'true');
+  assert.deepEqual(JSON.parse(row.ratings_json).map(a=>a.score).sort(),[0,0,2]);assert.equal(JSON.parse(row.researcher_decisions_json)[0].justification,'Critério revisto.');assert(JSON.parse(row.reference_history_json).some(h=>h.score===1));
+});
+
+test('exportação de ciclos arquivados preserva base e referências da época sem incluir itens futuros',()=>{
+  const t=study({n:12,k:1});train(t);rateCalibration(t);const old=t.s.cycle.id;
+  t.act('restart');t.act('import',{data:[{id:'new-item',objective:'Objetivo',prompt:'Entrada',response:'Resposta'}]});t.act('reference',{itemId:'case-0',score:2});
+  const rows=exportedItems(t.s),archived=rows.filter(r=>r.cycle===old),current=rows.filter(r=>r.cycle===t.s.cycle.id);
+  assert.equal(archived.length,12);assert.equal(current.length,13);assert.equal(archived.find(r=>r.item_id==='case-0').reference_score,'0');assert.equal(current.find(r=>r.item_id==='case-0').reference_score,'2');
+  assert(!archived.some(r=>r.item_id==='new-item'));
+});
+
 test('notas aceitam observação ausente, vazia ou curta sem bloquear a calibração',()=>{
   for(const justification of [undefined,'','   ','x']) {
     const t=study({k:1});train(t);

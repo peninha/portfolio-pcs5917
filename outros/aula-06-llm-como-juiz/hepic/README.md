@@ -172,3 +172,18 @@ node scripts/seed-qa.mjs
 
 A chave acima é apenas da demonstração local. Nunca use essa chave em produção. As referências sintéticas não fazem parte do estudo real.
 
+## Exportação de todos os itens
+
+Em **Resultados → Todos os itens CSV**, o arquivo `hepic-results-AAAA-MM-DD.csv` inclui toda a base atual, com **uma linha por item e por ciclo**. Uma base de 152 itens em um único ciclo gera 152 registros, além do cabeçalho. Os ciclos arquivados aparecem em linhas separadas, identificados por `cycle`.
+
+- `item_phase`: `reference` (exemplo de treinamento ou item inconclusivo na preparação de referências), `calibration`, `evaluation` ou `unused`. Quando há mais de um uso, a prioridade é avaliação, calibração, referência.
+- `is_reference`, `is_calibration`, `is_evaluation`: identificam os usos sem perder sobreposições entre etapas; um item de calibração promovido a exemplo tem as duas primeiras marcas verdadeiras. `calibration_rounds` lista as rodadas.
+- `status`, `n_ratings`, `disagreement`, `final_score`: descrevem a etapa indicada em `item_phase`. Referências têm a nota do pesquisador e zero avaliações individuais; itens não utilizados ou ainda pendentes não recebem nota final. `adjudicated` indica decisão posterior do pesquisador na calibração ou avaliação. `decision_phase` identifica a etapa consolidada, também para compatibilidade com exportações anteriores.
+- `n_assigned` e `n_submitted`: totais de atribuições e respostas individuais do item no ciclo, considerando todas as etapas.
+- `ratings_json`: atribuições individuais, incluindo pendências, fase, rodada, avaliador, nota, observação, versão de referência e data de envio. `calibration_history_json` preserva as rodadas, discordâncias e decisões; `requiresReview` representa o encaminhamento para revisão, inclusive por sinalização de inconclusivo.
+- `reference_history_json`, `reference_score`, `reference_observation`: versões e decisões dos exemplos de treinamento. `researcher_decisions_json` preserva decisões da calibração, avaliação e registros de inconclusivo.
+
+As primeiras 22 colunas da exportação anterior continuam presentes, seguidas das novas colunas de identificação e histórico. Para analisar somente a avaliação independente, filtre `item_phase = evaluation`. Para consultar todos os usos de um item, use as marcas de etapa e os históricos. O CSV de notas individuais continua disponível separadamente; o **Backup completo JSON** também preserva configurações, confirmações de treinamento, auditoria e demais dados administrativos.
+
+Novos arquivamentos guardam a lista completa de itens do ciclo. Para ciclos arquivados antes dessa mudança, sem essa lista, a exportação inclui os itens identificáveis nas atribuições, referências e inconclusivos, sem inventar participação de itens importados posteriormente.
+
