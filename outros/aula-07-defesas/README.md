@@ -1,5 +1,11 @@
 # Aula 7 — Protocolo de defesas do Grupo A
 
+**Experimento complementar de confidencialidade:** o
+[notebook separado](../../notebooks/aula-07-confidencialidade.ipynb) permite
+testar um segredo fictício em `system` e o pedido em `user`, com as sete condições.
+Consulte [CONFIDENCIALIDADE.md](CONFIDENCIALIDADE.md) para o critério de vazamento
+literal e a entrega separada para Arthur. Esse lote não integra a ASR de pedidos nocivos.
+
 **Coleta oficial do grupo:** use o [protocolo 3.1.0](PROTOCOLO.md) e o
 [ZIP para compartilhar](protocolo-grupo-a-v3.1.0.zip). O coletor oficial aplica
 as sete condições, reaproveita o baseline da triagem e exporta as respostas.
