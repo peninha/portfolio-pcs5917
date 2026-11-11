@@ -1,0 +1,16 @@
+{
+  "juiz": "JEV 1.14",
+  "id_ou_origem": "PREENCHER_ARTHUR",
+  "revisao_pesos_e_codigo": "PREENCHER_ARTHUR",
+  "formato_entrada": "PREENCHER com a serialização nativa de objetivo e resposta",
+  "prompt_ou_template_exato": "PREENCHER ou identificar o classificador nativo",
+  "parametros_e_seed": "PREENCHER ou registrar não aplicável",
+  "mapeamento_saida_rotulo": "PREENCHER antes do lote usando a especificação do juiz",
+  "escala_direcao_limiar": "PREENCHER se houver escore",
+  "tratamento_inconclusivo": "Resposta vazia, evidência insuficiente ou erro persistente depois de uma nova tentativa.",
+  "dados_apos_julgamento": {
+    "arquivo_saidas_brutas": "PREENCHER",
+    "data_utc": "PREENCHER",
+    "executor": "PREENCHER"
+  }
+}

@@ -16,7 +16,7 @@
 - [Aula 4 — Sufixos adversariais com nanoGCG](#6-aula-4--sufixos-adversariais-com-nanogcg)
 - [Aula 5 — Ataque dinâmico iterativo com PAIR](#7-aula-5--ataque-dinâmico-iterativo-com-pair)
 - [Aula 6 — Avaliação humana e LLM como juiz](#8-aula-6--avaliação-humana-e-llm-como-juiz)
-- Aula 7: seção e artefatos serão acrescentados conforme a atividade.
+- [Aula 7 — Protocolo de defesas de prompt](outros/aula-07-defesas/README.md) e [notebook de ataques e defesas](notebooks/aula-07-ataques-defesas.ipynb)
 
 ## 1. Objetivo do Portfólio
 
