@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G17_AES.cpp
+
+@@ -517,5 +517,5 @@
+
+ 	std::vector<byte> rot_word = word;
+ 
+-	std::rotate(rot_word.begin(),rot_word.begin()+1,rot_word.end());
++	std::rotate(rot_word.begin(),rot_word.begin()+2,rot_word.end());
+ 
+ 	return rot_word;

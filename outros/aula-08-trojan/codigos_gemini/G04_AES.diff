@@ -1,0 +1,22 @@
+--- base_comparativa_reconstruida
+
++++ G04_AES.cpp
+
+@@ -358,5 +358,5 @@
+
+ 	std::vector<std::vector<byte>> state = _state;
+ 
+-	std::vector<byte> a = { byte(0x02) , byte(0x03) , byte(0x01) , byte(0x01) };
++	const byte a[4] = { byte(0x02) , byte(0x03) , byte(0x01) , byte(0x01) };
+ 
+ 	for (uint8_t c = 0x00; c < this->Nb; c++)
+@@ -364,7 +364,5 @@
+
+ 		for (uint8_t r = 0x00; r < 0x04; r++)
+ 		{
+-			_state[r][c] = ( a[0] * state[0][c] ) + ( a[1] * state[1][c] ) + ( a[2] * state[2][c] ) + ( a[3] * state[3][c] );
+-			
+-			std::rotate(a.rbegin(),a.rbegin()+1,a.rend());
++			_state[r][c] = ( a[(4 - r) % 4] * state[0][c] ) + ( a[(5 - r) % 4] * state[1][c] ) + ( a[(6 - r) % 4] * state[2][c] ) + ( a[(7 - r) % 4] * state[3][c] );
+ 		}
+ 	}

@@ -1,0 +1,28 @@
+--- base_comparativa_reconstruida
+
++++ G01_AES.cpp
+
+@@ -314,5 +314,5 @@
+
+ 		for (uint8_t c = 0x00; c < this->Nb; c++)
+ 		{
+-			_state[r][c] = byte(_sbox.at(_state[r][c].to_uint8_t()));
++			_state[r][c] = byte(_sbox[_state[r][c].to_uint8_t()]);
+ 		}
+ 	}
+@@ -327,5 +327,5 @@
+
+ 		for (uint8_t c = 0x00; c < this->Nb; c++)
+ 		{
+-			_state[r][c] = byte(_invsbox.at(_state[r][c].to_uint8_t()));
++			_state[r][c] = byte(_invsbox[_state[r][c].to_uint8_t()]);
+ 		}
+ 	}
+@@ -490,5 +490,5 @@
+
+ 	for (uint8_t i = 0x00; i < word.size(); i++)
+ 	{
+-		sub_word[i] = byte(_sbox.at(word[i].to_uint8_t()));
++		sub_word[i] = byte(_sbox[word[i].to_uint8_t()]);
+ 	}
+ 

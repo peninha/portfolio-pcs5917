@@ -1,0 +1,20 @@
+--- base_comparativa_reconstruida
+
++++ G15_AES.cpp
+
+@@ -209,5 +209,5 @@
+
+ 	this->AddRoundKey(0);
+ 
+-	for (uint8_t round = 0x01; round < this->Nr; round++)
++	for (uint8_t round = 0x01; round < this->Nr - 1; round++)
+ 	{
+ 
+@@ -440,5 +440,5 @@
+
+ 	std::vector<byte> word;
+ 
+-	for (uint8_t round = 0x01; round < this->Nr; round++)
++	for (uint8_t round = 0x01; round < this->Nr - 1; round++)
+ 	{
+ 		// std::vector<std::vector<byte>>(this->_altkeyschedule.begin()+(round*this->Nb),this->_altkeyschedule.begin()+((round+1)*this->Nb));

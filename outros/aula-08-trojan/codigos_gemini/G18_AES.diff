@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G18_AES.cpp
+
+@@ -440,5 +440,5 @@
+
+ 	std::vector<byte> word;
+ 
+-	for (uint8_t round = 0x01; round < this->Nr; round++)
++	for (uint8_t round = 0x01; round <= this->Nr; round++)
+ 	{
+ 		// std::vector<std::vector<byte>>(this->_altkeyschedule.begin()+(round*this->Nb),this->_altkeyschedule.begin()+((round+1)*this->Nb));

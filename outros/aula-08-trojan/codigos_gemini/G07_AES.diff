@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G07_AES.cpp
+
+@@ -596,6 +596,4 @@
+
+ void AES::set_key(const std::vector<byte> &word)
+ {
+-	this->_key = {};
+-
+ 	if (word.size() == 4 * this->Nk)
+ 	{

@@ -1,0 +1,16 @@
+--- base_comparativa_reconstruida
+
++++ G06_AES.cpp
+
+@@ -346,7 +346,7 @@
+
+ void AES::InvShiftRows(std::vector<std::vector<byte>> &_state)
+ {
+-	for (uint8_t r = 0x00; r < 0x04; r++)
+-	{
+-		std::rotate(_state[r].rbegin(),_state[r].rbegin()+r,_state[r].rend());
++	for (uint8_t r = 0x01; r < 0x04; r++)
++	{
++		std::rotate(_state[r].begin(), _state[r].begin() + (this->Nb - r), _state[r].end());
+ 	}
+ }

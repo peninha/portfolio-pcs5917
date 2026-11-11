@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G05_AES.cpp
+
+@@ -336,5 +336,5 @@
+
+ void AES::ShiftRows(std::vector<std::vector<byte>> &_state)
+ {
+-	for (uint8_t r = 0x00; r < 0x04; r++)
++	for (uint8_t r = 0x01; r < 0x04; r++)
+ 	{
+ 		std::rotate(_state[r].begin(),_state[r].begin()+r,_state[r].end());

@@ -1,0 +1,640 @@
+#include "AES/AES.hpp"
+bool AES::verbose = false;
+
+std::vector<uint8_t> AES::_sbox = std::vector<uint8_t>(0x00);
+std::vector<uint8_t> AES::_invsbox = std::vector<uint8_t>(0x00);
+
+void AES::initialize(void)
+{
+
+	if (this->_sbox.size() == 0)
+	{
+		this->_sbox = std::vector<uint8_t>(0xff + 1);
+		this->_invsbox = std::vector<uint8_t>(0xff + 1);
+
+		byte inv_byte;
+		std::bitset<8> inv_bits;
+		std::bitset<8> affine_bits;
+
+		const std::bitset<8> affine_const = std::bitset<8>(0x63);
+
+		for (uint16_t j = 0x00; j <= 0xff; j++)
+		{
+			inv_byte = byte(j);
+			inv_byte = inv_byte.inverse();
+
+			inv_bits = inv_byte.to_bitset();
+
+			for (uint8_t i = 0x00; i < 0x08; i++)
+			{
+				affine_bits[i] = inv_bits[i] ^ inv_bits[(i + 4) % 8] ^ inv_bits[(i + 5) % 8] ^ inv_bits[(i + 6) % 8] ^ inv_bits[(i + 7) % 8] ^ affine_const[i];
+			}
+
+			this->_sbox[j] = (uint8_t)affine_bits.to_ulong();
+			this->_invsbox[(int)this->_sbox[j]] = (uint8_t)j;
+		}
+
+		// this->print_bytetable(this->_sbox);
+		// this->print_bytetable(this->_invsbox);
+
+	}
+
+	{
+		this->_rcon = std::vector<std::vector<byte>>((this->Nb*(this->Nr+1)-1)/this->Nk);
+
+		this->_rcon[0] = { byte(0x01) , byte(0x00) , byte(0x00) , byte(0x00) };
+
+		for (uint16_t i = 0x01; i < this->_rcon.size(); i++)
+		{
+			this->_rcon[i] = { this->_rcon[i-1][0] * byte(0x02) , byte(0x00) , byte(0x00) , byte(0x00) };
+		}
+		
+	}
+}
+
+AES::AES(AES::Variant variant)
+{
+	this->_variant = variant;
+
+	switch (this->_variant)
+	{
+		case AES::Variant::AES_128:
+			this->Nk = 4; this->Nb = 4; this->Nr = 10;
+			break;
+		case AES::Variant::AES_192:
+			this->Nk = 6; this->Nb = 4; this->Nr = 12;
+			break;
+		case AES::Variant::AES_256:
+			this->Nk = 8; this->Nb = 4; this->Nr = 14;
+			break;
+	}
+
+	AES::initialize();
+}
+
+AES::~AES()
+{
+
+}
+
+void AES::print_state(const std::vector<std::vector<byte>> &_state) const
+{
+	std::cout << "?" << std::string(5 * this->Nb + 2, ' ') << "?" << std::endl;
+	
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		std::cout << "?";
+
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			std::cout << std::right << std::setw(3) << std::setfill(' ') << "" << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_state[r][c].to_uint8_t());
+		}
+		std::cout << std::string(2, ' ') << "?" << std::endl;
+	}
+	std::cout << "?" << std::string(5 * this->Nb + 2, ' ') << "?" << std::endl;
+
+	std::cout << std::endl;
+}
+
+void AES::print_state(void) const { AES::print_state(this->_state); }
+
+void AES::print_word(const std::vector<byte> &word) const
+{
+	for (uint8_t i = 0x00; i < word.size(); i++)
+	{
+		std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(word[i].to_uint8_t());
+	}
+}
+
+void AES::print_keyschedule_string(const std::vector<std::vector<byte>> &_keyschedule,const uint8_t &round) const
+{	
+	for (uint8_t c = 0x00; c < this->Nb; c++)
+	{
+		for (uint8_t r = 0x00; r < 0x04; r++)
+		{
+			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[round*this->Nb+c][r].to_uint8_t());
+		}
+	}
+	std::cout << std::endl;
+}
+
+void AES::print_keyschedule_string(const uint8_t &round) const { AES::print_keyschedule_string(this->_keyschedule,round); }
+
+void AES::print_bytetable(const std::vector<uint8_t> &bytemap) const
+{
+	if(bytemap.size() == 0xff + 1)
+	{
+		std::cout << std::string(4, ' ');
+		for (uint8_t y = 0x00; y <= 0x0f; y++)
+		{
+			std::cout << std::string(2, ' ') << std::right << std::setw(1) << std::setfill('0') << std::hex << (int)(y);
+		}
+		std::cout << std::endl;
+
+		std::cout << std::string(3, ' ') << "?" << "????????????????????????????????????????????????" << std::endl;
+		for (uint8_t x = 0x00; x <= 0x0f; x++)
+		{
+			std::cout << " " << std::right << std::setw(1) << std::setfill('0') << std::hex << (int)(x) << " ?";
+
+			for (uint8_t y = 0x00; y <= 0x0f; y++)
+			{
+				std::cout << " " << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(bytemap[(x<<4)+y]);
+			}
+			std::cout << std::endl;
+		}
+	}
+	else
+	{
+		throw;
+	}
+}
+
+void AES::print_keyschedule(const std::vector<std::vector<byte>> &_keyschedule) const
+{
+	
+	for (uint8_t i = 0x00; i < _keyschedule.size(); i++)
+	{
+		std::cout << "(" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)i << std::hex << ")";
+
+		std::cout << std::right << std::setw(4) << std::setfill(' ') << "x";
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[i][c].to_uint8_t());
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << std::endl;
+}
+
+void AES::print_keyschedule(void) const { AES::print_keyschedule(this->_keyschedule); }
+
+std::vector<std::vector<byte>> AES::to_state(const std::vector<byte> &word) const
+{
+	std::vector<std::vector<byte>> state = std::vector<std::vector<byte>>(4);
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		state[r] = std::vector<byte>(this->Nb);
+
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			state[r][c] = word[r + 4 * c];
+		}
+	}
+
+	return state;
+}
+
+std::vector<byte> AES::to_word(const std::vector<std::vector<byte>> &state) const
+{
+	std::vector<byte> word = std::vector<byte>(4 * this->Nb);
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			word[r + 4 * c] = state[r][c];
+		}
+	}
+
+	return word;
+}
+
+void AES::Cipher(void)
+{
+	
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].input" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].k_sch" << "\t\t"; this->print_keyschedule_string(0); }
+	this->AddRoundKey(0);
+
+	for (uint8_t round = 0x01; round < this->Nr; round++)
+	{
+
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(round) << "].start" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->SubBytes();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(round) << "].s_box" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->ShiftRows();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(round) << "].s_row" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->MixColumns();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(round) << "].m_col" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(round) << "].k_sch" << "\t\t"; this->print_keyschedule_string(round); }
+		this->AddRoundKey(round);
+	}
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].start" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->SubBytes();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].s_box" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->ShiftRows();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].s_row" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].k_sch" << "\t\t"; this->print_keyschedule_string(this->Nr); }
+	this->AddRoundKey(this->Nr);
+
+
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].output" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+}
+
+void AES::InvCipher(void)
+{
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->Nr); }
+	this->AddRoundKey(this->Nr);
+
+	for (uint8_t round = this->Nr - 1; round > 0; round--)
+	{
+		
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvShiftRows();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_row" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvSubBytes();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].ik_sch" << "\t"; this->print_keyschedule_string(round); }
+		this->AddRoundKey(round);
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].ik_add" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvMixColumns();
+	}
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->InvShiftRows();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_row" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->InvSubBytes();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ik_sch" << "\t"; this->print_keyschedule_string(0); }
+	this->AddRoundKey(0);
+
+
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ioutput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+}
+
+void AES::EqInvCipher(void)
+{
+	
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,this->Nr); }
+	this->AddRoundKey(this->_altkeyschedule,this->_state,this->Nr);
+	
+	for (uint8_t round = this->Nr - 1; round > 0; round--)
+	{
+		
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvSubBytes();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvShiftRows();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_row" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		this->InvMixColumns();
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].im_col" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,round); }
+		this->AddRoundKey(this->_altkeyschedule,this->_state,round);
+	}
+	
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->InvSubBytes();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	this->InvShiftRows();
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_row" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,0); }
+	this->AddRoundKey(this->_altkeyschedule,this->_state,0);
+
+
+
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ioutput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+
+	//std::cout << "> EqInvCipher() is not supported." << std::endl;
+}
+
+void AES::SubBytes(std::vector<std::vector<byte>> &_state)
+{
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			_state[r][c] = byte(_sbox.at(_state[r][c].to_uint8_t()));
+		}
+	}
+}
+
+void AES::SubBytes(void) { AES::SubBytes(this->_state); }
+
+void AES::InvSubBytes(std::vector<std::vector<byte>> &_state)
+{
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			_state[r][c] = byte(_invsbox.at(_state[r][c].to_uint8_t()));
+		}
+	}
+}
+
+void AES::InvSubBytes(void) { AES::InvSubBytes(this->_state); }
+
+void AES::ShiftRows(std::vector<std::vector<byte>> &_state)
+{
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		std::rotate(_state[r].begin(),_state[r].begin()+r,_state[r].end());
+	}
+}
+
+void AES::ShiftRows(void) { AES::ShiftRows(this->_state); }
+
+void AES::InvShiftRows(std::vector<std::vector<byte>> &_state)
+{
+	for (uint8_t r = 0x00; r < 0x04; r++)
+	{
+		std::rotate(_state[r].rbegin(),_state[r].rbegin()+r,_state[r].rend());
+	}
+}
+
+void AES::InvShiftRows(void) { AES::InvShiftRows(this->_state); }
+
+void AES::MixColumns(std::vector<std::vector<byte>> &_state)
+{
+	std::vector<std::vector<byte>> state_copy = _state;
+
+	std::vector<byte> mix_coeffs = { byte(0x02) , byte(0x03) , byte(0x01) , byte(0x01) };
+
+	for (uint8_t c = 0x00; c < this->Nb; c++)
+	{
+		for (uint8_t r = 0x00; r < 0x04; r++)
+		{
+			_state[r][c] = ( mix_coeffs[0] * state_copy[0][c] ) + ( mix_coeffs[1] * state_copy[1][c] ) + ( mix_coeffs[2] * state_copy[2][c] ) + ( mix_coeffs[3] * state_copy[3][c] );
+			
+			std::rotate(mix_coeffs.rbegin(),mix_coeffs.rbegin()+1,mix_coeffs.rend());
+		}
+	}
+}
+
+void AES::MixColumns(void) { AES::MixColumns(this->_state); }
+
+void AES::InvMixColumns(std::vector<std::vector<byte>> &_state)
+{
+	std::vector<std::vector<byte>> state_copy = _state;
+
+	std::vector<byte> mix_coeffs = { byte(0x0e) , byte(0x0b) , byte(0x0d) , byte(0x09) };
+
+	for (uint8_t c = 0x00; c < this->Nb; c++)
+	{
+		for (uint8_t r = 0x00; r < 0x04; r++)
+		{
+			_state[r][c] = ( mix_coeffs[0] * state_copy[0][c] ) + ( mix_coeffs[1] * state_copy[1][c] ) + ( mix_coeffs[2] * state_copy[2][c] ) + ( mix_coeffs[3] * state_copy[3][c] );
+			
+			std::rotate(mix_coeffs.rbegin(),mix_coeffs.rbegin()+1,mix_coeffs.rend());
+		}
+	}
+}
+
+void AES::InvMixColumns(void) { AES::InvMixColumns(this->_state); }
+
+void AES::KeyExpansion(void)
+{
+	this->_keyschedule = std::vector<std::vector<byte>>(this->Nb*(this->Nr+1));
+
+	if(this->_key.size() == 4 * this->Nk)
+	{
+		for (uint8_t i = 0x00; i < this->Nk; i++)
+		{
+			this->_keyschedule[i] = { this->_key[4*i] , this->_key[4*i+1] , this->_key[4*i+2] , this->_key[4*i+3] };
+		}
+		
+		std::vector<byte> word_temp;
+
+		for (uint8_t i = this->Nk; i < this->Nb*(this->Nr+1); i++)
+		{
+			word_temp = this->_keyschedule[i-1];
+
+			if (i % this->Nk == 0x00)
+			{
+				word_temp = this->XorWord(this->SubWord(this->RotWord(word_temp)),this->_rcon[(i/this->Nk)-1]);
+			}
+			else if (this->Nk > 0x06 && i % this->Nk == 0x04)
+			{
+				word_temp = this->SubWord(word_temp);
+			}
+
+			this->_keyschedule[i] = this->XorWord(this->_keyschedule[i-this->Nk],word_temp);
+
+		}
+
+		this->KeyExpansionAddendum();
+
+
+	}
+	else
+	{
+		throw;
+	}
+}
+
+void AES::KeyExpansionAddendum(void)
+{
+	this->_altkeyschedule = this->_keyschedule;
+
+	std::vector<std::vector<byte>> key_state;
+	std::vector<byte> flat_key_word;
+	std::vector<byte> round_word;
+
+	for (uint8_t round = 0x01; round < this->Nr; round++)
+	{
+		// std::vector<std::vector<byte>>(this->_altkeyschedule.begin()+(round*this->Nb),this->_altkeyschedule.begin()+((round+1)*this->Nb));
+
+		flat_key_word = {};
+
+
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			round_word = this->_altkeyschedule[round*this->Nb+c];
+			flat_key_word.insert(flat_key_word.end(),round_word.begin(),round_word.end());
+		}
+
+		key_state = this->to_state(flat_key_word);
+
+		this->InvMixColumns(key_state);
+
+		flat_key_word = this->to_word(key_state);
+
+		for (uint8_t c = 0x00; c < this->Nb; c++)
+		{
+			std::copy(flat_key_word.begin()+(c*4),flat_key_word.begin()+((c+1)*4),this->_altkeyschedule[round*this->Nb+c].begin());
+		}
+	}
+
+	//for (uint8_t i = 0x00; i < this->_altkeyschedule.size(); i++)
+	//{
+	//	this->print_word(this->_altkeyschedule[i]); std::cout << std::endl;
+	//}
+}
+
+void AES::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule, std::vector<std::vector<byte>> &_state,uint8_t round)
+{
+	for (uint8_t c = 0x00; c < this->Nb; c++)
+	{
+		for (uint8_t r = 0x00; r < 0x04; r++)
+		{
+			_state[r][c] = _state[r][c] + _keyschedule[round*this->Nb+c][r];
+		}
+	}
+}
+
+void AES::AddRoundKey(uint8_t round) { AES::AddRoundKey(this->_keyschedule,this->_state,round); }
+
+std::vector<byte> AES::SubWord(const std::vector<byte> &word) const
+{
+	std::vector<byte> sub_word = word;
+
+	for (uint8_t i = 0x00; i < word.size(); i++)
+	{
+		sub_word[i] = byte(_sbox.at(word[i].to_uint8_t()));
+	}
+
+	return sub_word;
+}
+
+std::vector<byte> AES::XorWord(const std::vector<byte> &word1,const std::vector<byte> &word2) const
+{
+	std::vector<byte> xor_word = word1;
+
+	if (word1.size() == word2.size())
+		for (uint8_t i = 0x00; i < xor_word.size(); i++)
+		{
+			xor_word[i] = xor_word[i] + word2[i];
+		}
+	else
+	{
+		throw;
+	}
+
+	return xor_word;
+}
+
+std::vector<byte> AES::RotWord(const std::vector<byte> &word) const
+{
+	std::vector<byte> rot_word = word;
+
+	std::rotate(rot_word.begin(),rot_word.begin()+1,rot_word.end());
+
+	return rot_word;
+}
+
+void AES::compute_example_vectors(void)
+{
+
+	std::vector<byte> example_key;
+
+	std::cout << std::endl << std::string( 80 , '*' ) << std::endl;
+	std::cout << " Example Vectors for ";
+
+	switch (this->_variant)
+	{
+		case AES::Variant::AES_128:
+			std::cout << "AES-128 (NIST FIPS 197, Appendix C.1)" << std::endl;
+		
+			//keyword = { byte(0x2b) , byte(0x7e) , byte(0x15) , byte(0x16) , byte(0x28) , byte(0xae) , byte(0xd2) , byte(0xa6) , byte(0xab) , byte(0xf7) , byte(0x15) , byte(0x88) , byte(0x09) , byte(0xcf) , byte(0x4f) , byte(0x3c) };
+			example_key = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) };
+
+			break;
+		case AES::Variant::AES_192:
+			std::cout << "AES-192 (NIST FIPS 197, Appendix C.2)" << std::endl;
+		
+			//keyword = { byte(0x8e) , byte(0x73) , byte(0xb0) , byte(0xf7) , byte(0xda) , byte(0x0e) , byte(0x64) , byte(0x52) , byte(0xc8) , byte(0x10) , byte(0xf3) , byte(0x2b) , byte(0x80) , byte(0x90) , byte(0x79) , byte(0xe5) , byte(0x62) , byte(0xf8) , byte(0xea) , byte(0xd2) , byte(0x52) , byte(0x2c) , byte(0x6b) , byte(0x7b) };
+			example_key = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) };
+
+			break;
+		case AES::Variant::AES_256:
+			std::cout << "AES-256 (NIST FIPS 197, Appendix C.3)" << std::endl;
+		
+			//keyword = { byte(0x60) , byte(0x3d) , byte(0xeb) , byte(0x10) , byte(0x15) , byte(0xca) , byte(0x71) , byte(0xbe) , byte(0x2b) , byte(0x73) , byte(0xae) , byte(0xf0) , byte(0x85) , byte(0x7d) , byte(0x77) , byte(0x81) , byte(0x1f) , byte(0x35) , byte(0x2c) , byte(0x07) , byte(0x3b) , byte(0x61) , byte(0x08) , byte(0xd7) , byte(0x2d) , byte(0x98) , byte(0x10) , byte(0xa3) , byte(0x09) , byte(0x14) , byte(0xdf) , byte(0xf4) };
+			example_key = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) , byte(0x18) , byte(0x19) , byte(0x1a) , byte(0x1b) , byte(0x1c) , byte(0x1d) , byte(0x1e) , byte(0x1f) };
+
+			break;
+	}
+	std::cout << std::endl;
+
+	this->_key = example_key;
+	this->KeyExpansion();
+
+
+	//std::vector<byte> word = { byte(0x32) , byte(0x43) , byte(0xf6) , byte(0xa8) , byte(0x88) , byte(0x5a) , byte(0x30) , byte(0x8d) , byte(0x31) , byte(0x31) , byte(0x98) , byte(0xa2) , byte(0xe0) , byte(0x37) , byte(0x07) , byte(0x34) };
+	std::vector<byte> example_plaintext = { byte(0x00) , byte(0x11) , byte(0x22) , byte(0x33) , byte(0x44) , byte(0x55) , byte(0x66) , byte(0x77) , byte(0x88) , byte(0x99) , byte(0xaa) , byte(0xbb) , byte(0xcc) , byte(0xdd) , byte(0xee) , byte(0xff) };
+
+	this->_state = this->to_state(example_plaintext);
+
+
+	std::cout << "PLAINTEXT:" << "\t\t"; this->print_word(example_plaintext); std::cout << std::endl;
+	std::cout << "KEY:" << "\t\t\t"; this->print_word(example_key); std::cout << std::endl;
+	std::cout << std::endl;
+
+
+	bool previous_verbose = this->verbose;
+	this->verbose = true;
+
+
+	std::cout << "CIPHER (ENCRYPT):" << std::endl;
+	this->Cipher();
+	std::cout << std::endl;
+
+	std::vector<std::vector<byte>> encrypted_state = this->_state;
+
+	std::cout << "INVERSE CIPHER (DECRYPT):" << std::endl;
+	this->_state = encrypted_state;
+	this->InvCipher();
+	std::cout << std::endl;
+
+	std::cout << "EQUIVALENT INVERSE CIPHER (DECRYPT):" << std::endl;
+	this->_state = encrypted_state;
+	this->EqInvCipher();
+	std::cout << std::endl;
+
+	this->verbose = previous_verbose;
+}
+
+void AES::set_key(const std::vector<byte> &word)
+{
+	this->_key = {};
+
+	if (word.size() == 4 * this->Nk)
+	{
+		this->_key = word;
+		this->KeyExpansion();
+	}
+	else
+	{
+		throw std::invalid_argument( "Key size does not match AES standard." );
+	}
+}
+
+std::vector<byte> AES::encrypt(const std::vector<byte> &word)
+{
+	if (word.size() == 4 * this->Nb)
+	{
+		this->_state = this->to_state(word);
+		this->Cipher();
+
+		return this->to_word(this->_state);
+	}
+	else
+	{
+		throw std::invalid_argument( "Block length does not match AES standard." );
+		return {};
+	}
+}
+
+std::vector<byte> AES::decrypt(const std::vector<byte> &word)
+{
+	if (word.size() == 4 * this->Nb)
+	{
+		this->_state = this->to_state(word);
+		this->InvCipher();
+
+		return this->to_word(this->_state);
+	}
+	else
+	{
+		throw std::invalid_argument( "Block length does not match AES standard." );
+		return {};
+	}
+}

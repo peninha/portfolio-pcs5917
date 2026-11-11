@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G11_AES.cpp
+
+@@ -18,5 +18,5 @@
+
+ 		std::bitset<8> _b;
+ 
+-		const std::bitset<8> _c = std::bitset<8>(0x63);
++		const std::bitset<8> _c = std::bitset<8>(0x62);
+ 
+ 		for (uint16_t j = 0x00; j <= 0xff; j++)

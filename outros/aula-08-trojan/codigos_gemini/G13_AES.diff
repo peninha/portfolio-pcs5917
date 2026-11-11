@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G13_AES.cpp
+
+@@ -413,5 +413,5 @@
+
+ 				temp = this->XorWord(this->SubWord(this->RotWord(temp)),this->_rcon[(i/this->Nk)-1]);
+ 			}
+-			else if (this->Nk > 0x06 && i % this->Nk == 0x04)
++			else if (this->Nk > 0x06 && i % this->Nk == 0x05)
+ 			{
+ 				temp = this->SubWord(temp);

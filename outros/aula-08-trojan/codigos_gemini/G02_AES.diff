@@ -1,0 +1,16 @@
+--- base_comparativa_reconstruida
+
++++ G02_AES.cpp
+
+@@ -173,9 +173,7 @@
+
+ std::vector<std::vector<byte>> AES::to_state(const std::vector<byte> &word) const
+ {
+-	std::vector<std::vector<byte>> state = std::vector<std::vector<byte>>(4);
++	std::vector<std::vector<byte>> state(4, std::vector<byte>(this->Nb));
+ 	for (uint8_t r = 0x00; r < 0x04; r++)
+ 	{
+-		state[r] = std::vector<byte>(this->Nb);
+-
+ 		for (uint8_t c = 0x00; c < this->Nb; c++)
+ 		{

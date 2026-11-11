@@ -1,0 +1,14 @@
+--- base_comparativa_reconstruida
+
++++ G03_AES.cpp
+
+@@ -444,6 +444,6 @@
+
+ 		// std::vector<std::vector<byte>>(this->_altkeyschedule.begin()+(round*this->Nb),this->_altkeyschedule.begin()+((round+1)*this->Nb));
+ 
+-		keyschedule_word = {};
+-
++		keyschedule_word.clear();
++		keyschedule_word.reserve(4 * this->Nb);
+ 
+ 		for (uint8_t c = 0x00; c < this->Nb; c++)

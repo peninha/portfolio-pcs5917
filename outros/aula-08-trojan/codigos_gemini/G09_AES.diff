@@ -1,0 +1,16 @@
+--- base_comparativa_reconstruida
+
++++ G09_AES.cpp
+
+@@ -403,9 +403,7 @@
+
+ 		}
+ 		
+-		std::vector<byte> temp;
+-
+ 		for (uint8_t i = this->Nk; i < this->Nb*(this->Nr+1); i++)
+ 		{
+-			temp = this->_keyschedule[i-1];
++			std::vector<byte> temp = this->_keyschedule[i-1];
+ 
+ 			if (i % this->Nk == 0x00)

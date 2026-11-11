@@ -1,0 +1,22 @@
+--- base_comparativa_reconstruida
+
++++ G08_AES.cpp
+
+@@ -11,6 +11,6 @@
+
+ 	if (this->_sbox.size() == 0)
+ 	{
+-		this->_sbox = std::vector<uint8_t>(0xff + 1);
+-		this->_invsbox = std::vector<uint8_t>(0xff + 1);
++		this->_sbox = std::vector<uint8_t>(256);
++		this->_invsbox = std::vector<uint8_t>(256);
+ 
+ 		byte _X;
+@@ -124,5 +124,5 @@
+
+ void AES::print_bytetable(const std::vector<uint8_t> &bytemap) const
+ {
+-	if(bytemap.size() == 0xff + 1)
++	if(bytemap.size() == 256)
+ 	{
+ 		std::cout << std::string(4, ' ');

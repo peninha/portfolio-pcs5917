@@ -1,0 +1,28 @@
+--- base_comparativa_reconstruida
+
++++ G10_AES.cpp
+
+@@ -498,14 +498,13 @@
+
+ std::vector<byte> AES::XorWord(const std::vector<byte> &word1,const std::vector<byte> &word2) const
+ {
++	if (word1.size() != word2.size())
++	{
++		throw std::invalid_argument("Words must have the same size.");
++	}
++
+ 	std::vector<byte> xor_word = word1;
+-
+-	if (word1.size() == word2.size())
+-		for (uint8_t i = 0x00; i < xor_word.size(); i++)
+-		{
+-			xor_word[i] = xor_word[i] + word2[i];
+-		}
+-	else
+-	{
+-		throw;
++	for (uint8_t i = 0x00; i < xor_word.size(); i++)
++	{
++		xor_word[i] = xor_word[i] + word2[i];
+ 	}
+ 

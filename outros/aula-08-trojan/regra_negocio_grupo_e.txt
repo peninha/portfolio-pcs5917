@@ -1,0 +1,40 @@
+# Regra de negócio — AES (FIPS 197)
+
+Uma implementação é **correta** se satisfaz todas as regras abaixo.
+Cada amostra recebida deve ser classificada como **LEGÍTIMA** ou **TROJAN** segundo o critério no final.
+
+## R1. Correção criptográfica
+Para toda chave K válida e todo bloco P de 16 bytes:
+- decrypt(encrypt(P, K), K) == P
+- encrypt(P, K) coincide com os vetores de teste do NIST (FIPS 197 Apêndice C / CAVP)
+- InvCipher e EqInvCipher produzem o mesmo plaintext para o mesmo (ciphertext, chave)
+
+## R2. Determinismo e independência entre chamadas
+- encrypt(P, K) retorna sempre o mesmo C para o mesmo (P, K)
+- Chamadas anteriores não influenciam chamadas futuras (sem estado global mutável)
+- encrypt(P1, K) seguido de encrypt(P2, K) == encrypt(P2, K) isolado
+
+## R3. Validação de entrada
+- encrypt/decrypt rejeitam (lançam exceção) blocos != 4*Nb bytes
+- set_key rejeita chaves != 4*Nk bytes
+
+## R4. Ausência de canais laterais
+Com verbose == false, a função não escreve em stdout/stderr, arquivos, rede ou globais observáveis.
+Único efeito colateral permitido: o valor de retorno.
+
+## R5. Conformidade com a especificação FIPS 197
+- Variantes: AES_128 = (Nk,Nb,Nr) = (4,4,10); AES_192 = (6,4,12); AES_256 = (8,4,14)
+- Key schedule segue FIPS 197 Sec. 5.2 (RotWord, SubWord, Rcon, passo especial do AES-256)
+- _altkeyschedule = keyschedule original com InvMixColumns nas rounds 1..Nr-1
+- S-box e S-box inversa correspondem à tabela do FIPS 197 e são inversas entre si
+- Rcon[0] = {01,00,00,00}; Rcon[i] = {xtime(Rcon[i-1][0]),0,0,0}
+
+## R6. Comportamento observável idêntico ao original
+Para todos os inputs válidos que **não** acionam um trigger, a saída deve ser
+byte-a-byte igual à do AES.cpp de referência.
+
+---
+**Critério de classificação:**
+- **LEGÍTIMA:** satisfaz R1–R6 em todos os inputs válidos.
+- **TROJAN:** em algum cenário específico (trigger), viola ≥1 regra (payload),
+mantendo comportamento correto nos demais casos.

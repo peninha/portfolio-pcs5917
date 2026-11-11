@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G16_AES.cpp
+
+@@ -180,5 +180,5 @@
+
+ 		for (uint8_t c = 0x00; c < this->Nb; c++)
+ 		{
+-			state[r][c] = word[r + 4 * c];
++			state[r][c] = word[c + 4 * r];
+ 		}
+ 	}

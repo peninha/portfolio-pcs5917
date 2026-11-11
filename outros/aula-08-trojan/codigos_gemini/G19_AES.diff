@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G19_AES.cpp
+
+@@ -264,5 +264,5 @@
+
+ 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_box" << "	"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
+ 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ik_sch" << "	"; this->print_keyschedule_string(0); }
+-	this->AddRoundKey(0);
++	this->AddRoundKey(1);
+ 
+ 

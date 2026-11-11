@@ -1,0 +1,349 @@
+{
+  "fonte_sha256": "69ef791c9c7f0beb897f2307e593d3a8e38b07690f5fdf88c16e0930a5fb1306",
+  "extracao_identica": 20,
+  "manifesto": [
+    {
+      "id": "1",
+      "arquivo": "G01_AES.cpp",
+      "sha256_codigo_utf8": "e06d8e284764475b73161d6a196ec5f458af95952b46cd5ff414fb4ce66619a3"
+    },
+    {
+      "id": "2",
+      "arquivo": "G02_AES.cpp",
+      "sha256_codigo_utf8": "478d752e0dcca7241fbc29f5bd75c822386118a2441c8379fdb7f98cc9c78bd0"
+    },
+    {
+      "id": "3",
+      "arquivo": "G03_AES.cpp",
+      "sha256_codigo_utf8": "f312885f952540a36a28e057f98b9f6f146ba765646e1c3d5592106651ef77de"
+    },
+    {
+      "id": "4",
+      "arquivo": "G04_AES.cpp",
+      "sha256_codigo_utf8": "4d0293f77c2b23d341d1a20cbdcc96a75d5fd0d67485e28ec70e26c79344323e"
+    },
+    {
+      "id": "5",
+      "arquivo": "G05_AES.cpp",
+      "sha256_codigo_utf8": "9afa12eb8b978601f29656492ffcf957e3f0e4c867fcf41eead89adbe171de43"
+    },
+    {
+      "id": "6",
+      "arquivo": "G06_AES.cpp",
+      "sha256_codigo_utf8": "5754a0a14d1de05807b51acb359a03a383c17c07307eb8c49117c6a139572a93"
+    },
+    {
+      "id": "7",
+      "arquivo": "G07_AES.cpp",
+      "sha256_codigo_utf8": "4c6da3111d94232c86b27a5db19b89769a17dd58ade9861ebbcc542c41fddd11"
+    },
+    {
+      "id": "8",
+      "arquivo": "G08_AES.cpp",
+      "sha256_codigo_utf8": "658563c8e78ed23b3b82003358b4463a9c1f8c4b59b34c30b2b236910816dff2"
+    },
+    {
+      "id": "9",
+      "arquivo": "G09_AES.cpp",
+      "sha256_codigo_utf8": "a8c6df6b25682a3f8a1ce25ef97dc8c790f3b598c2a94a283d5ac88a65035542"
+    },
+    {
+      "id": "10",
+      "arquivo": "G10_AES.cpp",
+      "sha256_codigo_utf8": "ed479bf3840645f77e20aec1f8800547c9313bc2c3c01f6ba57b7d6f35a66961"
+    },
+    {
+      "id": "11",
+      "arquivo": "G11_AES.cpp",
+      "sha256_codigo_utf8": "4d23da157706748ca2ef1d81598f38e2f960ee51c24e77eae53f8c9baf56a142"
+    },
+    {
+      "id": "12",
+      "arquivo": "G12_AES.cpp",
+      "sha256_codigo_utf8": "967d5b9c7bca46e74a4d0a9a3cb12046ab0dfd913f46adba77ea255e23e2cfd0"
+    },
+    {
+      "id": "13",
+      "arquivo": "G13_AES.cpp",
+      "sha256_codigo_utf8": "e72057ae478c66d037150f4bd99ce19f37f75fe8a5dea5472c03d9599bf6d2a5"
+    },
+    {
+      "id": "14",
+      "arquivo": "G14_AES.cpp",
+      "sha256_codigo_utf8": "581c6265c93d6ccb267b6035f5ca625af062436d620fa60c265aa018e71e4c30"
+    },
+    {
+      "id": "15",
+      "arquivo": "G15_AES.cpp",
+      "sha256_codigo_utf8": "3f797a2cae3bbf7c599f1879ff5b6e5dcf72a0681566ccbca41bb9cbd7f8df7a"
+    },
+    {
+      "id": "16",
+      "arquivo": "G16_AES.cpp",
+      "sha256_codigo_utf8": "210e9c7928acb43f9b92e232e666438e210e48524cac1a1c91ae314f22386d05"
+    },
+    {
+      "id": "17",
+      "arquivo": "G17_AES.cpp",
+      "sha256_codigo_utf8": "202e59b14ee8ad12b0c2e30145265a7cde6a9b033265c95280fcfea5a448a822"
+    },
+    {
+      "id": "18",
+      "arquivo": "G18_AES.cpp",
+      "sha256_codigo_utf8": "a62e6b38ed93b4ba683a0f3322fe5cf8777add37ce7b73244317abc07007d04f"
+    },
+    {
+      "id": "19",
+      "arquivo": "G19_AES.cpp",
+      "sha256_codigo_utf8": "ed134e90cdea7973b0bb5da62e3c3bd57785f376193421cee0fd91bd2e84c1e8"
+    },
+    {
+      "id": "20",
+      "arquivo": "G20_AES.cpp",
+      "sha256_codigo_utf8": "5f83236162655736cd167569da43a6a35f9d7a1f2a3854beff5fd13cad6afcb2"
+    }
+  ],
+  "id04_matriz_equivalente": [
+    [
+      2,
+      3,
+      1,
+      1
+    ],
+    [
+      1,
+      2,
+      3,
+      1
+    ],
+    [
+      1,
+      1,
+      2,
+      3
+    ],
+    [
+      3,
+      1,
+      1,
+      2
+    ]
+  ],
+  "id06_permutacao_equivalente": true,
+  "id12_rcon": {
+    "128": {
+      "tamanho_rcon": 10,
+      "acessos": [
+        {
+          "i": 4,
+          "correto": 0,
+          "alterado": 0
+        },
+        {
+          "i": 8,
+          "correto": 1,
+          "alterado": 1
+        },
+        {
+          "i": 12,
+          "correto": 2,
+          "alterado": 2
+        },
+        {
+          "i": 16,
+          "correto": 3,
+          "alterado": 3
+        },
+        {
+          "i": 20,
+          "correto": 4,
+          "alterado": 4
+        },
+        {
+          "i": 24,
+          "correto": 5,
+          "alterado": 5
+        },
+        {
+          "i": 28,
+          "correto": 6,
+          "alterado": 6
+        },
+        {
+          "i": 32,
+          "correto": 7,
+          "alterado": 7
+        },
+        {
+          "i": 36,
+          "correto": 8,
+          "alterado": 8
+        },
+        {
+          "i": 40,
+          "correto": 9,
+          "alterado": 9
+        }
+      ],
+      "primeiro_fora_dos_limites": null
+    },
+    "192": {
+      "tamanho_rcon": 8,
+      "acessos": [
+        {
+          "i": 6,
+          "correto": 0,
+          "alterado": 0
+        },
+        {
+          "i": 12,
+          "correto": 1,
+          "alterado": 2
+        },
+        {
+          "i": 18,
+          "correto": 2,
+          "alterado": 3
+        },
+        {
+          "i": 24,
+          "correto": 3,
+          "alterado": 5
+        },
+        {
+          "i": 30,
+          "correto": 4,
+          "alterado": 6
+        },
+        {
+          "i": 36,
+          "correto": 5,
+          "alterado": 8
+        },
+        {
+          "i": 42,
+          "correto": 6,
+          "alterado": 9
+        },
+        {
+          "i": 48,
+          "correto": 7,
+          "alterado": 11
+        }
+      ],
+      "primeiro_fora_dos_limites": {
+        "i": 36,
+        "correto": 5,
+        "alterado": 8
+      }
+    },
+    "256": {
+      "tamanho_rcon": 7,
+      "acessos": [
+        {
+          "i": 8,
+          "correto": 0,
+          "alterado": 1
+        },
+        {
+          "i": 16,
+          "correto": 1,
+          "alterado": 3
+        },
+        {
+          "i": 24,
+          "correto": 2,
+          "alterado": 5
+        },
+        {
+          "i": 32,
+          "correto": 3,
+          "alterado": 7
+        },
+        {
+          "i": 40,
+          "correto": 4,
+          "alterado": 9
+        },
+        {
+          "i": 48,
+          "correto": 5,
+          "alterado": 11
+        },
+        {
+          "i": 56,
+          "correto": 6,
+          "alterado": 13
+        }
+      ],
+      "primeiro_fora_dos_limites": {
+        "i": 32,
+        "correto": 3,
+        "alterado": 7
+      }
+    }
+  },
+  "id16_entrada": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "id16_to_word_to_state": [
+    0,
+    4,
+    8,
+    12,
+    1,
+    5,
+    9,
+    13,
+    2,
+    6,
+    10,
+    14,
+    3,
+    7,
+    11,
+    15
+  ],
+  "id20_shift_seguido_de_invshift": {
+    "0": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "1": [
+      2,
+      3,
+      0,
+      1
+    ],
+    "2": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "3": [
+      2,
+      3,
+      0,
+      1
+    ]
+  },
+  "escopo": "Checagens locais das expressões. Não representam execução completa do AES."
+}

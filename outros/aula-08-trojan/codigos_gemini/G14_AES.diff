@@ -1,0 +1,12 @@
+--- base_comparativa_reconstruida
+
++++ G14_AES.cpp
+
+@@ -358,5 +358,5 @@
+
+ 	std::vector<std::vector<byte>> state = _state;
+ 
+-	std::vector<byte> a = { byte(0x02) , byte(0x03) , byte(0x01) , byte(0x01) };
++	std::vector<byte> a = { byte(0x03) , byte(0x02) , byte(0x01) , byte(0x01) };
+ 
+ 	for (uint8_t c = 0x00; c < this->Nb; c++)
