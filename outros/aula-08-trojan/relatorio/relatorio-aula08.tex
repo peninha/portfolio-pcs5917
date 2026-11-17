@@ -1,0 +1,112 @@
+% Compilar com pdflatex relatorio-aula08.tex (duas vezes).
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\babelprovide[main,import]{brazilian}
+\usepackage{mathptmx,multicol,xcolor}
+\usepackage[hmargin=16mm,vmargin=16mm,footskip=9mm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\setlength{\columnsep}{7mm}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{3pt}
+\definecolor{alerta}{HTML}{285669}
+\definecolor{inocua}{HTML}{DAE4E8}
+\newcommand{\secao}[1]{\subsection*{#1}}
+\newcommand{\tema}[1]{\par\medskip\noindent\textbf{#1}\par}
+\begin{document}
+\noindent\small PCS5917 -- IA Adversarial \hfill Grupo A \quad Aula 8 \quad 17/11/2026
+\par\noindent\rule{\textwidth}{0.4pt}
+\begin{flushleft}
+{\LARGE\bfseries Geração e detecção de trojans entre grupos}\par\medskip
+Arthur Moriggi Pimenta (9425636) -- arthur.moriggi.pimenta@usp.br\\
+Caio Vinícius Ribeiro da Silva (18083535) -- caiovribeiro@usp.br\\
+Roberto Spinelli Filho (3119088) -- rspinelli@usp.br\\
+Escola Politécnica da Universidade de São Paulo\\
+Professor: Dr. Victor Takashi Hayashi -- victor.hayashi@usp.br
+\end{flushleft}
+\normalsize
+\noindent\textbf{Resumo.} Os grupos A e E trocaram conjuntos de código para avaliar a detecção de trojans por inspeção das alterações. Considerando trojan como classe positiva, o grupo A classificou corretamente as vinte variantes de AES do grupo E, com 100\% de acurácia, precisão, sensibilidade, especificidade e F1. Nas vinte variantes do PicoRV32 produzidas pelo grupo A, o grupo E obteve 75\% de acurácia, 100\% de precisão, 50\% de sensibilidade, 100\% de especificidade e F1 de 66,7\%. Os cinco falsos negativos envolveram histórico, protocolo de memória ou controle do processador.
+
+\begin{multicols}{2}
+\raggedcolumns
+\fontsize{9.6}{11.2}\selectfont
+\secao{1\quad Introdução}
+O desafio desta atividade foi distinguir, no código recebido de outro grupo, as mudanças legítimas daquelas que introduziam falhas deliberadas, chamadas de trojans. Na troca entre os grupos A e E, o comportamento esperado de cada sistema orientava essa distinção. No processador PicoRV32, por exemplo, reescrever uma soma pode preservar o resultado da instrução. Já na cifra AES, uma pequena alteração pode fazer a mesma chave e a mesma mensagem produzirem resultados diferentes conforme o histórico de chamadas.
+
+\secao{2\quad Metodologia}
+\tema{Produção do desafio PicoRV32}
+Escolhemos o PicoRV32 [1], um núcleo de processador descrito em Verilog, como \textit{golden model} do grupo A. Cada variante partiu da mesma revisão de referência. Adotamos o conjunto básico de instruções inteiras de 32 bits da arquitetura RISC-V (RV32I), com interface nativa de memória, sem interrupções ou coprocessador. Uma variante legítima deveria preservar os resultados das instruções, as transações de memória, o reinício do núcleo, a sinalização de exceções e o progresso da execução.
+
+Nosso primeiro desafio foi obter do assistente propostas de alterações deliberadamente incorretas para o exercício. Usamos o Codex com o modelo GPT-6 Astra e nível de raciocínio alto. Conduzimos a interação manualmente, em prompts sucessivos, nos quais explicitamos o contexto da disciplina IA Adversarial da Poli-USP e a finalidade das amostras: produzir um conjunto didático para revisão de código entre os grupos. Essa interação foi suficiente para desenvolver as variantes, sem necessidade de empregar o método PAIR.
+
+Os grupos já sabiam que a composição total seria de dez trojans e dez variantes inócuas. Para que a complexidade aparente desse pouca pista sobre a classe, revisamos a lista de inócuas e incluímos refatorações que também exigiam análise funcional. Em uma delas, decompusemos uma soma em duas metades: reconhecer a equivalência exigia acompanhar o transporte entre elas. Enviamos a referência, as variantes com IDs permutados de S01 a S20 e a planilha de classificação. Nosso grupo guardou o gabarito.
+
+\tema{Inspeção do AES recebido}
+O grupo E forneceu vinte versões em C++ e seis regras para a implementação do AES [2]. As regras cobriam correção da cifra, independência entre chamadas, rejeição de tamanhos inválidos, ausência de efeitos externos indevidos, conformidade das operações e concordância com a referência fora das condições de ativação.
+
+Identificamos as vinte versões recebidas como A01 a A20. Com apoio do Codex, usamos o código de A01 como ponto de partida para localizar trechos que variavam entre as versões. Avaliamos cada amostra pelas regras do AES, inclusive a própria A01: a cada 256 chamadas válidas de cifragem, ela alterava um bit do resultado. Registramos a classificação de cada versão antes da confirmação do grupo E.
+
+\secao{3\quad Resultados e análises}
+\tema{AES: 20 acertos em 20 amostras}
+O grupo E confirmou os vinte acertos do grupo A. Identificamos os dez trojans e as dez variantes inócuas, com zero falsos positivos e zero falsos negativos. Tomando trojan como classe positiva, obtivemos acurácia de 100\% (20/20), precisão de 100\% (10/10), sensibilidade de 100\% (10/10), especificidade de 100\% (10/10) e F1 de 100\%.
+
+Em nossa leitura, muitas alterações inócuas eram mais simples de interpretar que os trojans: comentários, ajustes de formatação e renomeações tinham efeitos fáceis de delimitar. Além disso, algumas alterações tinham comentários que indicavam trechos suspeitos, o que ajudou em certos momentos. Saber que havia dez amostras de cada classe permitiu conferir a contagem ao final. A decisão sobre cada ID foi baseada sobre o efeito da mudança sobre o contrato de negócio estipulado pelo grupo E.
+
+A16 ilustra a importância do histórico. Na terceira chamada consecutiva com o mesmo bloco de entrada, a implementação altera a saída, contrariando a independência entre chamadas. A20 oferece um contraponto: a troca do contêiner de quatro coeficientes preserva seus valores, sua ordem e o resultado da operação.
+
+A17 recebeu o rótulo inócuo no gabarito. Há, contudo, uma ressalva na regra de validação: quando as asserções estão ativas, uma entrada de tamanho inválido pode encerrar o processo antes da exceção prevista. A revisão do contrato registra essa diferença mesmo com o acerto do rótulo. Entendemos que se tratava mais de um bug do que um malware deliberadamente inserido, já que já tinhamos outros 10 itens bem fundamentados como trojans.
+\end{multicols}
+\newpage
+\noindent\small PCS5917 -- IA Adversarial \hfill Aula 8 \quad PicoRV32 e AES
+\par\noindent\rule{\textwidth}{0.4pt}\normalsize
+\begin{multicols}{2}
+\raggedcolumns
+\tema{PicoRV32: cinco alertas em vinte variantes}
+Cruzamos os vinte rótulos devolvidos pelo grupo E com o gabarito pelo identificador de envio. Das quinze variantes marcadas como inócuas, dez eram benignas e cinco eram trojans. As outras cinco receberam o rótulo trojan e todas pertenciam a essa classe. A Figura 1 mostra a classificação dentro de cada classe real.
+
+\begin{center}
+\begingroup\small\setlength{\fboxsep}{0pt}
+\textbf{Classificação recebida por classe real}\par\medskip
+\noindent\begin{tabular}{@{}lr@{}}
+\textbf{Classe real} & \textbf{Resposta em 10 amostras}\\[4pt]
+Trojan & \colorbox{alerta}{\makebox[23mm]{\color{white}\strut 5}}\colorbox{inocua}{\makebox[23mm]{\strut 5}}\\[4pt]
+Inócua & \colorbox{inocua}{\makebox[46mm]{\strut 10}}\\
+\end{tabular}\par\medskip
+{\color{alerta}\rule{8pt}{8pt}} Trojan \qquad {\color{inocua}\rule{8pt}{8pt}} Inócua
+\endgroup
+\end{center}
+\noindent{\small\textbf{Figura 1.} Cada barra representa dez variantes do PicoRV32. As cores indicam os rótulos devolvidos pelo grupo E.}
+
+Tomando trojan como classe positiva, houve 5 verdadeiros positivos, 10 verdadeiros negativos, 5 falsos negativos e nenhum falso positivo. A acurácia do classificador do grupo E foi de 75\% (15/20). A precisão de 100\% (5/5) indica que todos os alertas estavam corretos. A sensibilidade de 50\% (5/10) indica que metade dos trojans foi detectada. A especificidade foi de 100\% (10/10) e o F1, média harmônica entre precisão e sensibilidade, foi de 66,7\%.
+
+\tema{O que havia nos cinco falsos negativos}
+Dois casos exigiam acompanhar o histórico. Em S01, o endereço de reinício podia depender de um valor anterior do contador de programa. Em S06, uma instrução podia receber o valor anterior de um operando. Em ambos, era preciso verificar a qual ciclo pertencia o dado usado pelo núcleo.
+
+Os outros três envolviam obrigações de controle. Em S07, uma requisição de escrita podia ser retirada enquanto a memória ainda aguardava a transferência. Em S08, o deslocador iterativo podia deixar de progredir ao terminar a contagem. Em S13, o núcleo podia parar sem emitir o sinal de exceção esperado.
+
+\tema{Quando a região alterada é a mesma}
+Um par da entrega ilustra o critério. S03 reorganiza a expressão lógica do protocolo de memória e preserva as condições de transferência previstas. S07 modifica por quanto tempo uma escrita permanece válida durante a espera. Ambas receberam o rótulo inócuo. O que distingue as duas é a obrigação de manter o pedido até que a memória o aceite.
+
+Entre os cinco trojans reconhecidos havia alterações na aritmética, nos desvios, no destino da escrita em registrador e nos dados de memória. Os cinco omitidos envolviam histórico, protocolo, progresso ou sinalização. A resposta recebida continha os rótulos de cada amostra. As razões de cada decisão não nos foram informadas pelo grupo E.
+
+\tema{Revisão conjunta em uma abordagem \textit{purple team}}
+No PicoRV32, a dificuldade de separar as classes apareceu em um sentido específico: o grupo E reconheceu todas as dez refatorações benignas, mas atribuiu o mesmo rótulo a cinco trojans. A distinção permaneceu difícil mesmo com a composição do conjunto conhecida. O resultado é compatível com nosso objetivo de construção. Para saber quanto a complexidade das refatorações pesou nas decisões, precisaríamos das justificativas do grupo E.
+
+A classificação cega preservou a independência dos pareceres. A devolução dos rótulos permitiu ao grupo A localizar as divergências. Uma revisão conjunta em formato \textit{purple team} daria o passo seguinte: os autores explicariam qual obrigação cada variante pretendia violar ou preservar, e os avaliadores mostrariam a evidência que sustentou sua decisão.
+
+Em S03 e S07, ambos rotulados como inócuos, os grupos poderiam comparar o que acontece entre o pedido de escrita e sua aceitação. Para os avaliadores, essa comparação serviria para incorporar a duração dos sinais ao critério de revisão. Para os autores, ajudaria a verificar se o material entregue descrevia essa obrigação com clareza. Como a devolutiva registrou apenas os rótulos, essa conversa é uma proposta de continuidade.
+
+\secao{4\quad Conclusão}
+A experiência sugere que foi acertada a escolha de incluir refatorações legítimas que também exigiam análise funcional. No AES, a simplicidade de várias mudanças benignas ajudou nosso grupo a distingui-las dos trojans. No desafio que propusemos, o grupo E reconheceu todas as variantes benignas, mas também classificou cinco trojans como inócuos. A distinção entre as classes permaneceu difícil, embora os rótulos recebidos, por si sós, não permitam atribuir esses erros à complexidade das amostras.
+
+Hayashi e Ruggiero [3] combinaram amostras de referência e dados sintéticos gerados por modelos de linguagem para estudar a detecção de trojans em projetos de hardware aberto. Na experiência do grupo A, o Codex com GPT-6 Astra contribuiu para as duas etapas do exercício. No PicoRV32, sugeriu tanto refatorações que preservavam o comportamento do núcleo quanto alterações que violavam seu contrato. No AES, ajudou a relacionar os trechos modificados às regras da cifra e a fundamentar as vinte classificações confirmadas pelo grupo E. Chamou nossa atenção que, no contexto acadêmico desta atividade, o assistente realizou as alterações deliberadamente prejudiciais sem apresentar objeções.
+
+Em novos ciclos de revisão conjunta, cada grupo poderia registrar a justificativa de suas decisões antes da abertura do gabarito. Ao confrontar essas justificativas com a intenção dos autores, seria possível identificar pistas superficiais na construção das amostras, refinar os critérios de detecção e avaliar, na rodada seguinte, se as mudanças ajudaram a distinguir as duas classes.
+
+\tema{Referências}
+{\small [1] YosysHQ. \href{https://github.com/YosysHQ/picorv32}{PicoRV32}. Revisão ef203c2, código de referência do desafio.\par
+[2] NIST. \href{https://doi.org/10.6028/NIST.FIPS.197-upd1}{Advanced Encryption Standard (AES)}. FIPS 197, atualização de 2023.\par
+[3] V. T. Hayashi e W. V. Ruggiero. \href{https://doi.org/10.1109/ACCESS.2025.3546156}{Hardware Trojan Detection in Open-Source Hardware Designs Using Machine Learning}. \textit{IEEE Access}, v. 13, p. 37771--37788, 2025. DOI: 10.1109/ACCESS.2025.3546156.\par}
+\end{multicols}
+\end{document}
