@@ -10,11 +10,11 @@ Documentação consolidada em **11/11/2026** para continuar o trabalho sem acess
 | Detecção do nosso PicoRV32 pelo outro grupo | IDs S01–S20 | **15/20 acertos, 75%**: dez inócuos e cinco trojans corretamente identificados. Cinco trojans foram classificados como inócuos. |
 | Segundo lote AES, opção Gemini | IDs 1–20, arquivos locais G01–G20 | Classificação proposta: 1–10 inócuos, 11–20 trojans. **Não há confirmação registrada do gabarito deste lote.** |
 
-**Pendência principal:** atualizar o relatório com o retorno sobre o PicoRV32. O Markdown e o PDF existentes ainda dizem que esse retorno está pendente. Os resultados corretos já estão documentados aqui; o PDF não foi atualizado durante esta tarefa de documentação.
+**Relatório final de 17/11/2026.** A versão em duas páginas incorpora a classificação recebida do PicoRV32. O gráfico está incluído na própria fonte LaTeX. [Abrir o PDF](../../../output/pdf/relatorio-aula08.pdf) · [Editar a fonte](../relatorio/relatorio-aula08.tex)
 
 ## Por onde continuar
 
-1. Leia [RETOMADA.md](RETOMADA.md): instruções para o próximo chat, preferências do usuário e roteiro de atualização.
+1. [RETOMADA.md](RETOMADA.md) preserva as preferências da atividade e o roteiro histórico da versão preliminar.
 2. Consulte [RESULTADOS.md](RESULTADOS.md): métricas, matriz de confusão, erros e interpretação das duas frentes confirmadas.
 3. Consulte [PROCESSO.md](PROCESSO.md): histórico de geração, anonimização, análise e decisões do relatório.
 4. Use [ARQUIVOS.md](ARQUIVOS.md) para localizar entradas, códigos, relatório e ferramentas.
@@ -32,4 +32,4 @@ Esta documentação e o catálogo interno contêm o gabarito. Eles não faziam p
 
 ## Preservação em outro computador
 
-Leve ou sincronize a pasta `outros/aula-08-trojan/` inteira, o PDF em `output/pdf/relatorio-aula08-preliminar.pdf` e o modelo `outros/aula-07-defesas/relatorio-aula07.pdf`. Todos os caminhos necessários estão no próprio repositório; o antigo checkout separado do PicoRV32 não é necessário para retomar a análise. Criar esta documentação não faz commit nem envia arquivos ao remoto automaticamente.
+Para editar a versão final, abra `outros/aula-08-trojan/relatorio/relatorio-aula08.tex` e compile com pdfLaTeX. O PDF publicado no repositório fica em `output/pdf/relatorio-aula08.pdf`.
