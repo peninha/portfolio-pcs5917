@@ -1,0 +1,219 @@
+{
+  "versao": 1,
+  "artigo": {
+    "id": "autorizacao",
+    "categoria": "posicao",
+    "titulo": "From Implicit Trust to Continuous Verification: A Position on the Authorization of AI Agents in Production Services",
+    "arquivo": "araujo-et-al-continuous-verification.pdf",
+    "fonte": "https://sol.sbc.org.br/index.php/sbseg_estendido/article/view/44562",
+    "exemplo": "autorizacao",
+    "pareceres": [
+      {
+        "id": "avaliador_1",
+        "nome": "Avaliador 1",
+        "modelo": "gpt-5.4-mini",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O problema é claramente contextualizado em serviços de produção que recebem requisições de agentes de IA com autoridade delegada, destacando riscos concretos como vazamento/replay de credenciais, limites de escopos estáticos e cruzamento de fronteiras de confiança.",
+            "evidencia": "p.1, Resumo e Seção 1 (Introdução)"
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é explícita: propõe uma arquitetura de três camadas conceituais para autorização de agentes e a posiciona frente a trabalhos e padrões relacionados, indicando a lacuna de composição integrada e binding entre planos.",
+            "evidencia": "p.1-2, Resumo; Seção 2; Seção 4 (Discussão e Related Work)"
+          },
+          {
+            "id": "C3",
+            "nota": 2,
+            "comentario": "A tese central e os principais termos técnicos são compreensíveis, com definição operacional das camadas, do PEP/PDP, da prova de posse, da identidade atestada e do binding entre planos.",
+            "evidencia": "p.1-3, Seções 1-3"
+          },
+          {
+            "id": "C4",
+            "nota": 2,
+            "comentario": "As conclusões são proporcionais ao argumento apresentado e delimitam o escopo ao domínio local, explicitando limitações e agenda futura em vez de extrapolar além do sustentado.",
+            "evidencia": "p.3-4, Seção 4 (Limitações) e Seção 5 (Conclusão e Research Agenda)"
+          },
+          {
+            "id": "P1",
+            "nota": 2,
+            "comentario": "A tese é sustentada por raciocínio técnico explícito, encadeando ameaças, mecanismos de verificação e composição com literatura e padrões citados, sem depender de afirmações isoladas.",
+            "evidencia": "p.1-4, Seções 1-4 e Referências"
+          },
+          {
+            "id": "P2",
+            "nota": 2,
+            "comentario": "O texto explicita implicações práticas do modelo proposto e examina alternativas/condições relevantes, como binding da chave atestada versus binding da identidade atestada e a limitação de portabilidade entre domínios.",
+            "evidencia": "p.2, Seção 2; p.3-4, Seção 4; p.4, Seção 5"
+          }
+        ]
+      },
+      {
+        "id": "avaliador_2",
+        "nome": "Avaliador 2",
+        "modelo": "gpt-5.4",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O texto caracteriza um problema de segurança concreto: serviços de produção passam a receber requisições de agentes de IA efêmeros, com autoridade delegada e atravessando fronteiras de confiança, o que expõe riscos como vazamento e replay de segredos, ocultação do delegante em credenciais bearer e decisões de acesso inadequadas ao contexto. Também explica por que isso importa para a admissão segura de requisições em produção.",
+            "evidencia": "p.1, Seção 1 (\"Production services were designed...\" até \"classic IAM falls short in four respects\")"
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é identificável como uma arquitetura conceitual em três camadas, com ênfase no problema de reconciliar delegação no plano organizacional com identidade atestada no plano de infraestrutura. O artigo a posiciona frente a blocos e padrões existentes, argumentando que a lacuna está na composição e no vínculo entre planos, não na ausência de mecanismos criptográficos isolados.",
+            "evidencia": "p.1, Resumo e Seção 1; p.1-2, Seção 2; p.3-4, Seção 4 (\"None of them, however, prescribes on its own the composition or the cross-plane binding argued for here\")"
+          },
+          {
+            "id": "C3",
+            "nota": 2,
+            "comentario": "A tese central é compreensível e os principais termos operacionais são definidos no texto: pre-authorization com proof of possession, identidade atestada do executor, binding entre credencial e canal, e decisão contextual externalizada. O cenário de \"cross-plane impersonation\" também é descrito com um exemplo técnico, o que reduz ambiguidade relevante.",
+            "evidencia": "p.1, Seção 1; p.1-2, Seção 2; p.2-3, Seção 3"
+          },
+          {
+            "id": "C4",
+            "nota": 1,
+            "comentario": "As conclusões são em geral coerentes com a argumentação, mas a formulação de necessidade ampla (\"safely admitting agentic requests requires...\") fica mais forte do que a sustentação disponível, pois o próprio texto delimita alcance: o binding resolve o caso local, a portabilidade entre domínios permanece em aberto e a proposta pressupõe um emissor capaz de expressar intenção e delegação. Essas condições importantes não aparecem com a mesma força na conclusão principal.",
+            "evidencia": "p.2, Seção 2 (\"The binding resolves cross-plane impersonation in the local case...\"); p.3, Seção 4 (\"Three limitations delimit its reach...\"); p.3, Seção 5"
+          },
+          {
+            "id": "P1",
+            "nota": 2,
+            "comentario": "A tese recebe sustentação por raciocínio técnico explícito: o artigo encadeia falhas do IAM clássico, define três camadas com funções distintas, descreve um fluxo de autorização e relaciona ameaças específicas às contramedidas propostas. Além disso, ancora os blocos usados em literatura e padrões citados, ainda que sem validação empírica.",
+            "evidencia": "p.1, Seção 1; p.1-3, Seções 2 e 3; p.3-4, Seção 4 e Referências"
+          },
+          {
+            "id": "P2",
+            "nota": 2,
+            "comentario": "O texto explicita implicações práticas da tese, como transformar o serviço em PEP robusto, rejeitar cedo na borda, montar documento de decisão versionável e aplicar princípios de menor privilégio por interseção e coerência de intenção. Também examina alternativa e condição relevante: vincular a chave atestada em vez da identidade atestada, com o custo de validade menor que o ciclo de rotação, além de registrar limitações para cenários entre domínios.",
+            "evidencia": "p.1, Seção 1; p.2, Seção 2 (\"Binding the attested key itself is an alternative...\"); p.2-3, Seção 3; p.3, Seção 4"
+          }
+        ]
+      },
+      {
+        "id": "avaliador_3",
+        "nome": "Avaliador 3",
+        "modelo": "gpt-5.5",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O texto explica o risco, o cenário e a consequência: agentes de IA efêmeros atuam por delegação, cruzam fronteiras de confiança e tornam inadequados segredos estáticos, credenciais bearer e escopos grosseiros, com riscos de vazamento, replay, ocultação do delegador e decisões sem contexto.",
+            "evidencia": "p.1, Introdução"
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é explicitada como uma arquitetura conceitual em três camadas e é posicionada diante de lacunas em padrões e trabalhos relacionados, afirmando que os blocos existem, mas falta sua composição no ponto de recepção da requisição.",
+            "evidencia": "p.1, Introdução; p.1-2, Seção 2; p.3, Seção 4"
+          },
+          {
+            "id": "C3",
+            "nota": 2,
+            "comentario": "A ideia central é compreensível: substituir confiança implícita por verificação contínua por requisição, separando pré-autorização criptográfica, identidade atestada e decisão contextual externalizada. Os termos centrais são definidos operacionalmente ao longo das camadas.",
+            "evidencia": "p.1, Introdução; p.1-3, Seções 2 e 3"
+          },
+          {
+            "id": "C4",
+            "nota": 2,
+            "comentario": "As conclusões são compatíveis com a argumentação apresentada e o texto delimita o alcance ao reconhecer limitações, como portabilidade entre domínios, dependência de um emissor capaz de expressar intenção/delegação e a limitação da coerência de intenção a aspectos estruturais.",
+            "evidencia": "p.3, Seção 4; p.3, Seção 5"
+          },
+          {
+            "id": "P1",
+            "nota": 2,
+            "comentario": "A tese é sustentada por raciocínio técnico explícito e por referências a mecanismos padronizados ou em padronização, como prova de posse, delegação explícita, declaração de intenção, identidade de workload atestada e interface de decisão. O texto também mapeia ameaças para controles correspondentes.",
+            "evidencia": "p.1-3, Seções 2, 3 e 4; p.3-4, Referências"
+          },
+          {
+            "id": "P2",
+            "nota": 2,
+            "comentario": "O texto explica implicações práticas da tese, como o serviço atuar como PEP, rejeição rápida na borda, uso de PDP desacoplado, auditoria e composição por deny-by-default. Também examina alternativa relevante, como vincular a chave atestada em vez da identidade atestada, e explicita o custo dessa opção.",
+            "evidencia": "p.1, Introdução; p.2, Seção 2; p.2-3, Seção 3"
+          }
+        ]
+      }
+    ],
+    "humanos": [],
+    "paginas": [
+      {
+        "numero": 1,
+        "texto": "From Implicit Trust to Continuous Verification: A Position on\nthe Authorization of AI Agents in Production Services \nDiego S. Araujo 1   , Silvio E. Quincozes 2 , Rodrigo Brand˜ ao Mansilha 3\n1 AI Horizon Labs, PPGES, Universidade Federal do Pampa (UNIPAMPA) \n{ diegoaraujo.aluno,   silvioquincozes, mansilha } @unipampa.edu.br \nAbstract.   Production services increasingly receive requests from AI agents that\nact under delegated authority, live for minutes, and cross trust boundaries that\nwere never mapped. We argue that admitting such requests safely requires aban-\ndoning implicit trust, so that every request is verified, every time. We describe\nan architecture of three conceptual layers that follow the life cycle of an agent\nrequest: cryptographic pre-authorization at the edge, workload identity attested\nby the execution platform, and contextual decisions externalized to a decoupled\npolicy engine. We conclude with the field’s main open problem: reconciling the\ndelegation asserted by the organizational plane with the identity attested by the\ninfrastructure. \n1. Introduction \nProduction services were designed for predictable human users or static software cli-\nents.   AI agents break that assumption, since they act under delegated authority, live\nfor only a few minutes, chain delegations, and cross heterogeneous trust boundaries\n[South et al. 2025a]. For this new consumer profile, classic IAM falls short in four res-\npects.   Static secrets invite leakage and replay when consumers are ephemeral; bearer\ncredentials hide who delegated the access and with what scope [Tallam 2026]; coarse-\ngrained scopes do not represent the intent of a concrete operation; and stable roles do not\naccommodate decisions that depend on attributes and context at every call. Our thesis is\nthat   admitting AI agent requests in a production service requires replacing implicit\ntrust with continuous verification, request by request . In practice, the service then acts\nas a robust Policy Enforcement Point (PEP), which performs the cryptographic checks at\nthe edge and delegates the semantic decision to a decoupled Policy Decision Point (PDP).\nThe central gap, however, is not technological, since the cryptographic building blocks\nthat are needed already exist and are standardized. It is conceptual: what is missing is an\narrangement that composes those blocks at the point where the request is received. \n2. An Architecture of Three Conceptual Layers \nThe architecture, summarized in Figure 1, organizes the five concepts into three layers:\npre-authorization with proof of possession; attested identity and its binding; intent, evalu-\nation of delegation, and externalized decision. The first layer establishes the cryptographic\npreconditions on the mandatory path of the service. The presented credential must be un-\ntampered, addressed to this service, and within its validity period, and the requester must\nprove possession of the key to which it is bound; bearer credentials are therefore inad-\nmissible for agentic consumers. Requests that fail these checks are rejected at the edge,\nbefore any policy decision. \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n1"
+      },
+      {
+        "numero": 2,
+        "texto": "Figura 1.   The three conceptual layers and the outcome of authorization.   The\ncritical gap and the binding that resolves it lie in Layer 2. \nThe second layer establishes who executes. The agent’s identity cannot originate\nfrom a registered secret; it must be attested by the execution platform, ephemeral, auto-\nmatically rotated, and presented over an authenticated channel. Two independent checks\nthen coexist: proof of possession binds the credential to a key, while channel authenti-\ncation binds the connection to a process. Neither of them asserts that key and process\nbelong to the same executor. A second attested process that obtains the credential and the\nkey, both data at rest, presents valid proof over its own attested channel, and both checks\npass, which amounts to what we call cross-plane impersonation. We argue for converting\nthis apparent redundancy into a cross-plane binding: issuance records in the credential\nthe attested identity of the recipient, verified at that moment, and the service compares it\nwith the channel identity on every request. Binding the attested key itself is an alterna-\ntive, at the cost of requiring a validity shorter than the rotation cycle. The attested identity\nbelongs to the infrastructure plane (which process executes); the delegation asserted at\nissuance belongs to the organizational plane (on whose behalf, with which rights). The\nbinding resolves cross-plane impersonation in the local case, a single domain whose is-\nsuer verifies the attestation. Evaluating both planes together is the role of the next layer;\nreconciling them in general remains open (Section 5).\nThe third layer decides whether this request, from this agent, on behalf of this\nhuman and in this context, should be served. In the decision document, the service as-\nsembles the identity of the delegator and their permissions, the attested identity of the\nexecutor, the intent declared in structured form, and the operational context, and queries\na decoupled policy engine through a standardized interface.   The decision, which may\ncarry obligations such as masking attributes, is enforced by the service and recorded in a\ntamper-evident audit trail. \n3. Authorization Flow and Policy Principles \nThe flow runs through the steps of reception; verification of the credential and of the proof\nof possession; attestation of the executor, including the correspondence between the key\nconfirmed by the credential and the channel identity; assembly of the decision document;\nevaluation by the policy engine; provisioning with minimal scopes and validity, or denial\nthat distinguishes an authentication failure from an authorization denial; and auditing. \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n2"
+      },
+      {
+        "numero": 3,
+        "texto": "This yields fast denial at the edge and reproducible decisions, since the decision docu-\nment is versioned along with the policies. Four principles, composed by conjunction un-\nder deny-by-default, govern the flow:   temporal conformance , which restricts windows\nand validity periods;   least privilege by intersection , by which the effective permission\nis the intersection of the delegator’s rights and the executor’s attested capabilities, never\ntheir union;   intent coherence , which compares the declared intent with the requested ope-\nration; and   personal data governance , which minimizes and masks attributes whenever\nthe decision so requires. \n4. Discussion and Related Work \nThe arrangement covers the central threats.   Credential theft and replay run up against\nproof of possession;   executor impersonation, against attestation;   cross-plane imper-\nsonation, against the cross-plane binding; delegation escalation, against the intersec-\ntion; intent deviation, against coherence; and misuse of personal data, against gover-\nnance.   Three limitations delimit its reach: the portability of agent identity across do-\nmains remains open [IETF WIMSE Working Group 2026]; the proposal presupposes a\ncredential issuer able to express intent and delegation; and intent coherence verifies\nstructural consistency, not the agent’s internal plan [Syros et al. 2026].   The position\ncan be instantiated with blocks that are standardized or being standardized, such as\nproof of possession of credentials [Fett et al. 2023, Campbell et al. 2020], explicit delega-\ntion [Jones et al. 2020], declaration of intent [Lodderstedt et al. 2023], attested workload\nidentity [SPIFFE Project 2025], decision interface [OpenID Foundation 2026], and cross-\ndomain identity [IETF WIMSE Working Group 2026]. None of them, however, prescri-\nbes on its own the composition or the cross-plane binding argued for here. The litera-\nture has established the problem [South et al. 2025a, South et al. 2025b, Tallam 2026],\nbut without specifying, as an integrated whole, the separation between cryptographic pre-\nauthorization, externalized decision, and cross-plane reconciliation. \n5. Conclusion and Research Agenda \nWe argue that safely admitting agentic requests requires continuous verification on a per-\nrequest basis, materialized in three conceptual layers: cryptographic pre-authorization\nwith proof of possession, attested identity bound to that proof, and externalized contex-\ntual decision. Together, they mark the shift from credential-centered authorization to an\nauthorization centered on attested identity, delegation, intent, and context. The agenda\nhas three fronts: a portable representation of the agent’s identity and capabilities beyond\nthe local domain [IETF WIMSE Working Group 2026]; metrics and reproducible attack\nsuites for agentic authorization [Tallam 2026]; and formalization of how the principles\ncompose and of the guarantees this offers. A reference implementation is the next step. \nAcknowledgements \nRodrigo acknowledges the support of FAPERGS (grant no.25/2551-0002572-9) and FA-\nPESP (grants no. 2020/05183-0 and 2023/00816-2). \nReferˆ encias \nCampbell, B., Bradley, J., Sakimura, N., and Lodderstedt, T. (2020). Oauth 2.0 mutual-tls\nclient authentication and certificate-bound access tokens. In   RFC 8705 . IETF. \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n3"
+      },
+      {
+        "numero": 4,
+        "texto": "Fett, D., Campbell, B., Bradley, J., Lodderstedt, T., Jones, M., and Waite, D. (2023).\nOauth 2.0 demonstrating proof of possession (dpop). In   RFC 9449 . IETF.\nIETF WIMSE Working Group (2026). Workload identity in a multi system environment\n(wimse) architecture.   In   Internet-Draft draft-ietf-wimse-arch-08, Work in progress .\nIETF.\nJones, M., Nadalin, A., Campbell, B., Bradley, J., and Mortimore, C. (2020). Oauth 2.0\ntoken exchange. In   RFC 8693 . IETF.\nLodderstedt, T., Richer, J., and Campbell, B. (2023).   Oauth 2.0 rich authorization re-\nquests. In   RFC 9396 . IETF.\nOpenID   Foundation   (2026).   Authorization   api   1.0   —   final   specification.\nIn   OpenID   AuthZEN   Working   Group .   OpenID   Foundation   (Available   at:\nhttps://openid.net/specs/authorization-api-1 0.html).\nSouth, T., Marro, S., Hardjono, T., Mahari, R., Whitney, C. D., Greenwood, D., Chan,\nA., and Pentland, A. (2025a). Authenticated delegation and authorized ai agents. In \nProceedings of the 42nd International Conference on Machine Learning (ICML 2025),\nPosition Paper Track . arXiv:2501.09674.\nSouth, T., Nagabhushanaradhya, S., Dissanayaka, A., Cecchetti, S., Fletcher, G., et al.\n(2025b).   Identity management for agentic ai:   The new frontier of authorization,\nauthentication, and security for an ai agent world.   In   OpenID Foundation Whitepa-\nper . arXiv:2510.25819.\nSPIFFE   Project   (2025).   The   spiffe   identity   and   verifiable   identity   docu-\nment   (spiffe-id).   In   Cloud   Native   Computing   Foundation .   Available   at:\nhttps://github.com/spiffe/spiffe/blob/main/standards/SPIFFE-ID.md.\nSyros, G., Suri, A., Ginesin, J., Nita-Rotaru, C., and Oprea, A. (2026). Saga: A security\narchitecture for governing ai agentic systems.   In   Network and Distributed System\nSecurity Symposium (NDSS 2026) . The Internet Society.\nTallam, K. (2026). Authorization propagation in multi-agent ai systems: Identity gover-\nnance as infrastructure. In   arXiv preprint . arXiv:2605.05440. \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n4"
+      }
+    ],
+    "triagem": {
+      "tipo": "decisions",
+      "modelo": "typesafe/jev-1.14-20261014",
+      "modeloSolicitado": "typesafe/jev-1.14",
+      "corte": 0.5,
+      "itens": [
+        {
+          "id": "Q1",
+          "sim": true,
+          "probabilidadeSim": 0.89
+        },
+        {
+          "id": "Q2",
+          "sim": true,
+          "probabilidadeSim": 0.98
+        },
+        {
+          "id": "Q3",
+          "sim": true,
+          "probabilidadeSim": 0.97
+        },
+        {
+          "id": "Q4",
+          "sim": true,
+          "probabilidadeSim": 0.98
+        }
+      ]
+    },
+    "sintese": {
+      "modelo": "gpt-5.5",
+      "resumo": "Os três avaliadores convergem em uma avaliação fortemente positiva do artigo. Eles consideram que o texto identifica um problema concreto de segurança em serviços de produção que recebem requisições de agentes de IA com autoridade delegada, apresenta uma contribuição clara na forma de uma arquitetura conceitual em três camadas, define os principais termos técnicos com precisão suficiente e sustenta a tese por raciocínio técnico e referências a padrões ou mecanismos existentes. Também há consenso de que o artigo discute implicações práticas e alternativas relevantes. A única divergência substantiva aparece em C4: os Avaliadores 1 e 3 entendem que as conclusões são proporcionais e bem delimitadas, enquanto o Avaliador 2 considera que a formulação de necessidade ampla na conclusão é mais forte do que a sustentação, pois algumas condições e limitações reconhecidas no corpo do texto não aparecem com a mesma ênfase na conclusão. A decisão final cabe ao editor.",
+      "itens": [
+        {
+          "id": "C1",
+          "comentario": "Há consenso de que o problema é relevante e bem caracterizado. Os avaliadores destacam que o artigo situa o cenário em serviços de produção que passam a receber requisições de agentes de IA efêmeros, com autoridade delegada e atravessando fronteiras de confiança. Também apontam que o texto explicita consequências de segurança, como vazamento e replay de credenciais, limitações de escopos estáticos, ocultação do delegante em credenciais bearer e decisões de acesso sem contexto adequado. As evidências citadas concentram-se no Resumo e na Introdução, especialmente p.1, Seção 1."
+        },
+        {
+          "id": "C2",
+          "comentario": "Os avaliadores concordam que a contribuição é identificável e bem posicionada. O artigo é descrito como uma proposta de arquitetura conceitual em três camadas para autorização de agentes, articulando pré-autorização, identidade atestada do executor e decisão contextual externalizada. A contribuição é situada diante de práticas, padrões e trabalhos relacionados, com a lacuna formulada como a falta de composição integrada e de vínculo entre planos, e não como ausência de mecanismos criptográficos isolados. As evidências indicadas aparecem no Resumo, na Introdução, na Seção 2 e na discussão de trabalhos relacionados na Seção 4."
+        },
+        {
+          "id": "C3",
+          "comentario": "Há consenso de que a clareza técnica é adequada. Os avaliadores afirmam que a tese central é compreensível e que os termos principais são definidos operacionalmente, incluindo PEP/PDP, prova de posse, identidade atestada, binding entre credencial e canal, delegação, intenção e decisão contextual. O Avaliador 2 ressalta ainda que o cenário de cross-plane impersonation é descrito por exemplo técnico, reduzindo ambiguidade. As evidências foram localizadas sobretudo em p.1-3, Seções 1 a 3."
+        },
+        {
+          "id": "C4",
+          "comentario": "Este é o único critério com divergência relevante. Os Avaliadores 1 e 3 consideram que as conclusões são proporcionais ao argumento e que o texto delimita adequadamente o alcance, mencionando limitações como portabilidade entre domínios, dependência de emissor capaz de expressar intenção/delegação e restrições da coerência de intenção. Já o Avaliador 2 atribui avaliação mais cautelosa: embora veja coerência geral, entende que a formulação ampla de que admitir requisições agentic com segurança 'requer' a composição proposta é mais forte do que a sustentação disponível, pois as condições e limitações reconhecidas nas Seções 2 e 4 não aparecem com a mesma força na conclusão. As evidências citadas incluem p.2, Seção 2; p.3, Seção 4; e p.3, Seção 5."
+        },
+        {
+          "id": "P1",
+          "comentario": "Os três avaliadores concordam que a tese é bem sustentada. Eles destacam que o artigo encadeia ameaças, falhas do IAM clássico, mecanismos de verificação e composição entre camadas, além de relacionar ameaças específicas a controles correspondentes. Também registram apoio em literatura, padrões ou mecanismos padronizados/em padronização, como prova de posse, delegação explícita, declaração de intenção, identidade de workload atestada e interfaces de decisão. O Avaliador 2 observa que não há validação empírica, mas ainda assim considera a sustentação técnica suficiente. As evidências citadas abrangem p.1-4, Seções 1 a 4 e Referências."
+        },
+        {
+          "id": "P2",
+          "comentario": "Há consenso de que o artigo explicita implicações práticas e examina alternativas ou condições relevantes. Os avaliadores mencionam implicações como transformar o serviço em PEP robusto, rejeitar requisições cedo na borda, usar PDP desacoplado, produzir documento de decisão versionável, aplicar deny-by-default, menor privilégio por interseção e coerência de intenção, além de apoiar auditoria. Também há destaque para a alternativa de vincular a chave atestada em vez da identidade atestada, com custo de validade menor que o ciclo de rotação, e para limitações de portabilidade entre domínios. As evidências citadas aparecem principalmente na Seção 2, Seção 3 e Seção 4."
+        }
+      ]
+    }
+  }
+}

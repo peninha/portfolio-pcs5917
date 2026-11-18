@@ -1,0 +1,219 @@
+{
+  "versao": 1,
+  "artigo": {
+    "id": "mineracao",
+    "categoria": "empirico",
+    "titulo": "Adversarial Attacks as a Diagnostic Tool for a Mining Detection Network in the Brazilian Legal Amazon",
+    "arquivo": "grupioni-et-al-mining-detection.pdf",
+    "fonte": "https://sol.sbc.org.br/index.php/sbseg_estendido/article/view/44553",
+    "exemplo": "mineracao",
+    "pareceres": [
+      {
+        "id": "avaliador_1",
+        "nome": "Avaliador 1",
+        "modelo": "gpt-5.4-mini",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O problema é relevante para segurança ambiental e para o risco de manipulação de um pipeline de fiscalização, pois o texto liga diretamente a detecção de mineração por CNN ao uso em enforcement e mostra que perturbações podem induzir falsos positivos ou evasão.",
+            "evidencia": "p.1 (Abstract e Introdução): \"their outputs are starting to feed enforcement pipelines\"; \"attack surface\"; \"vulnerable to adversarial examples\"."
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é identificável e bem posicionada frente a trabalhos anteriores: o artigo propõe um protocolo de avaliação com controle por frequência e usa ataques adversariais para diagnosticar o que o modelo aprendeu, em diálogo com a literatura de robustez e viés por textura.",
+            "evidencia": "p.1-2 (Introdução e Material e Métodos): \"We propose an evaluation protocol that distinguishes between them using a frequency-matched control\"; referências a Goodfellow et al. 2015, Geirhos et al. 2019 e Xu and Ghamisi 2022."
+          },
+          {
+            "id": "C3",
+            "nota": 2,
+            "comentario": "A ideia central, os termos técnicos e as premissas do estudo estão compreensíveis: há descrição do conjunto de dados, da arquitetura, das perturbações avaliadas e das métricas reportadas.",
+            "evidencia": "p.2 (Material and Methods) e p.3 (Results and Discussion): descrição do dataset, da CNN, das sete perturbações e dos resultados de desempenho."
+          },
+          {
+            "id": "C4",
+            "nota": 1,
+            "comentario": "As conclusões principais sobre dependência de textura de alta frequência e assimetria da fragilidade são compatíveis com os resultados, mas o texto avança além da demonstração ao concluir que a próxima etapa \"não é defesa neste modelo\" e que adversarial training só seria significativo após redesenho do dataset, o que é uma inferência forte não testada diretamente.",
+            "evidencia": "p.3 (Discussion): \"The next step is therefore not a defense on this model but a redesign of the dataset... Only then does adversarial training become meaningful\"."
+          },
+          {
+            "id": "E1",
+            "nota": 1,
+            "comentario": "O desenho é pertinente e usa comparações úteis entre ruído aleatório, ruído low-pass, brilho, FGSM e PGD, mas uma decisão importante sobre o cenário de avaliação fica sem justificativa prévia suficiente: a classe negativa é composta apenas por floresta preservada, o que o próprio texto reconhece depois como limitação e fonte de separabilidade trivial.",
+            "evidencia": "p.2 (Material and Methods): composição do dataset com \"half without mining and drawn from preserved forest\"; p.3 (Discussion): \"All 1300 negative patches come from preserved forest... the absence of false positives is an artifact of that choice\"."
+          },
+          {
+            "id": "E2",
+            "nota": 2,
+            "comentario": "O artigo fornece elementos suficientes para verificar o resultado principal: informa a divisão do dataset, a arquitetura, as perturbações, as métricas e ainda disponibiliza o dataset e um notebook de reprodução, com sementes fixas e execução determinística.",
+            "evidencia": "p.3 (Discussion): \"For reproduction, seeds were fixed at 42 with deterministic cuDNN. The dataset is available on Zenodo... and the notebook...\"; p.2-3 para os detalhes do protocolo e da tabela de resultados."
+          }
+        ]
+      },
+      {
+        "id": "avaliador_2",
+        "nome": "Avaliador 2",
+        "modelo": "gpt-5.4",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O texto explicita o risco de segurança no contexto de uso: saídas de CNN para detecção de garimpo passam a alimentar pipelines de fiscalização, podendo sofrer manipulação por perturbações; também distingue consequências práticas, como gerar falsos positivos para sobrecarregar analistas ou evasão de minas reais.",
+            "evidencia": "p.1, Introdução ('outputs are starting to feed enforcement pipelines, making them an attack surface'); p.2, Resultados ('exhausting the analysts rather than hiding a mine')"
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é identificável e situada frente à literatura: o artigo propõe um protocolo de avaliação com controle por frequência espacial ('frequency-matched control') para diagnosticar se o classificador usa textura de alta frequência, relacionando isso a ataques adversariais e ao viés textura-vs-forma em CNNs.",
+            "evidencia": "p.1, final da Introdução ('we propose an evaluation protocol that distinguishes between them using a frequency-matched control'); referências e discussão com Goodfellow et al. 2015, Xu and Ghamisi 2022 e Geirhos et al. 2019"
+          },
+          {
+            "id": "C3",
+            "nota": 2,
+            "comentario": "A ideia central, a hipótese e o procedimento principal são compreensíveis: há descrição do conjunto de dados, do modelo, dos tipos de perturbação e das métricas direcionais para falsos positivos e evasão. Há lacunas pontuais de parametrização fina, mas elas não impedem entender a afirmação central.",
+            "evidencia": "p.1, resumo e Introdução; p.2, Material and Methods; p.2, definição das métricas direcionais"
+          },
+          {
+            "id": "C4",
+            "nota": 2,
+            "comentario": "As conclusões são, em geral, proporcionais ao que foi demonstrado e o texto delimita o alcance ao reconhecer que o principal limitador é o desenho do conjunto de dados, especialmente a classe negativa composta apenas por floresta preservada. O artigo evita generalizar a robustez para além desse cenário e propõe redesenho do dataset antes de defesa adversarial.",
+            "evidencia": "p.3, 'The main limitation is the dataset'; p.3, 'The next step is therefore not a defense on this model but a redesign of the dataset'"
+          },
+          {
+            "id": "E1",
+            "nota": 1,
+            "comentario": "O desenho é pertinente para testar fragilidade e dependência de textura, especialmente pela comparação controlada entre ruído aleatório e ruído passa-baixa com mesmo orçamento e mesmo deslocamento médio, e pela separação entre falso positivo e evasão. Porém, uma decisão decisiva de dados/cenário fica sem justificativa adequada: toda a classe negativa vem de floresta preservada, o que o próprio artigo depois reconhece como separabilidade trivial e fonte de artefato.",
+            "evidencia": "p.2, Material and Methods ('half without mining and drawn from preserved forest'); p.2, justificativa das métricas direcionais; p.3, 'the negative class is trivially separable and the absence of false positives is an artifact of that choice'"
+          },
+          {
+            "id": "E2",
+            "nota": 1,
+            "comentario": "Há ligação entre achados e procedimento, com métricas, matriz de confusão, tabela de ataques, sementes fixas e ponteiros para dataset e notebook. Ainda assim, faltam no manuscrito detalhes decisivos para reconstrução independente da avaliação principal, como tamanho dos patches de entrada, pré-processamento exato e parâmetros completos de alguns ataques/otimização; além disso, o conteúdo do material externo citado não pode ser verificado a partir da submissão em si.",
+            "evidencia": "p.2, descrição geral da arquitetura e ataques; p.2, Tabela 1 e matriz de confusão; p.3, 'seeds were fixed at 42' e links para Zenodo/GitHub; elemento ausente no texto: tamanho do patch e parametrização completa de ataques como PGD/fog/occlusion"
+          }
+        ]
+      },
+      {
+        "id": "avaliador_3",
+        "nome": "Avaliador 3",
+        "modelo": "gpt-5.5",
+        "itens": [
+          {
+            "id": "C1",
+            "nota": 2,
+            "comentario": "O texto explicita o risco de segurança: classificadores de mineração alimentando fluxos de fiscalização podem ser manipulados para gerar falsos positivos ou evasão, afetando analistas e a aplicação ambiental.",
+            "evidencia": "p.1, Introdução; p.2–3, Resultados e Discussão, especialmente discussão de enforcement pipeline e exaustão de analistas"
+          },
+          {
+            "id": "C2",
+            "nota": 2,
+            "comentario": "A contribuição é identificável: usar ataques adversariais como diagnóstico, com controle por frequência, para revelar dependência de textura em uma CNN de detecção de mineração. O texto relaciona essa contribuição a trabalhos sobre detecção por CNN, exemplos adversariais, sensoriamento remoto e viés de textura.",
+            "evidencia": "p.1, Introdução; p.2, Métodos; referências a Camalan et al. 2022, Goodfellow et al. 2015, Xu e Ghamisi 2022, Geirhos et al. 2019"
+          },
+          {
+            "id": "C3",
+            "nota": 1,
+            "comentario": "A ideia central é compreensível, mas há ambiguidades técnicas relevantes: a construção exata do ruído passa-baixa, dos ataques PGD/FGSM, dos parâmetros de fog/occlusion e dos critérios de direcionamento não é detalhada no texto principal. Também há pequena inconsistência entre 0,5% no texto e 0,01 na tabela para low-pass noise.",
+            "evidencia": "p.2, Métodos; p.2, Tabela 1; p.2–3, Resultados e Discussão"
+          },
+          {
+            "id": "C4",
+            "nota": 2,
+            "comentario": "As conclusões são majoritariamente proporcionais ao experimento: o artigo limita a interpretação ao modelo e ao conjunto usado, reconhece que a classe negativa composta só por floresta preservada facilita atalhos e propõe redesenho do dataset antes de defesa adversarial.",
+            "evidencia": "p.3, Resultados e Discussão, parágrafo sobre limitação do dataset e classe negativa"
+          },
+          {
+            "id": "E1",
+            "nota": 1,
+            "comentario": "O desenho é pertinente para diagnosticar assimetria e dependência de alta frequência, usando métricas por direção e comparação entre ruído aleatório e passa-baixa. Porém decisões importantes ficam pouco justificadas ou limitam o cenário: classe negativa apenas de floresta preservada, uma única arquitetura/modelo, poucos exemplos por faixa no teste e detalhes incompletos dos ataques e perturbações.",
+            "evidencia": "p.1–2, Material e Métodos; p.3, limitação reconhecida do dataset"
+          },
+          {
+            "id": "E2",
+            "nota": 2,
+            "comentario": "O artigo apresenta ligação clara entre procedimento e resultados por meio de métricas limpas, matriz de confusão, tabela de taxas sob ataque, agrupamento por faixas e indicação de materiais para reprodução com dataset e notebook. Isso permite, em princípio, reconstruir a avaliação principal, embora a conferência dependa dos materiais externos citados.",
+            "evidencia": "p.2, matriz de confusão e Tabela 1; p.3, links para Zenodo e GitHub"
+          }
+        ]
+      }
+    ],
+    "humanos": [],
+    "paginas": [
+      {
+        "numero": 1,
+        "texto": "Adversarial Attacks as a Diagnostic Tool for a Mining\nDetection Network in the Brazilian Legal Amazon \nLeonardo Fajardo Grupioni 1 , Gabriel Stephano Santos 1 ,\nPaulo S´ ergio Cugnasca 1 , Felipe Valencia de Almeida 1\n1 Escola Polit´ ecnica da Universidade de S˜ ao Paulo (USP). S˜ ao Paulo, SP – Brazil \n{ leogrupioni,gabrielstephano,cugnasca,fvalencia } @usp.br \nAbstract.   Convolutional neural networks (CNNs) applied to satellite imagery\nare increasingly adopted as the standard tool to detect mining in the Brazil-\nian Legal Amazon, as their predicition start to feed environmental enforcement\npipelines.   We trained such a CNN and obtained an F1-Score of 0.9247 with\nan AUC of 0.9930. Adversarial attacks show that these numbers hide what the\nmodel learned. With the addition of random noise in the data, up to 45% of the\nof forest patches were missclassified as mining, while low-pass noise with the\nsame budget and the same mean shift turns 0.5%, so the decision rests on high\nfrequency texture. The fragility is asymmetric, since one FGSM step at 4/255\nconverts every forest patch into mining but evades only 5% of the real mining. \n1. Introduction \nMining in the Brazilian Legal Amazon is largely illegal and driven by organized criminal\nnetworks [Global Initiative Against Transnational Organized Crime 2023], and convolu-\ntional networks have become the standard way to detect these fronts from satellite imagery\n[Camalan et al. 2022]. Their outputs are starting to feed enforcement pipelines, making\nthem an attack surface, since neural classifiers can be driven to arbitrary outputs by pertur-\nbations that a human observer would not consider meaningful [Goodfellow et al. 2015],\nincluding in remote sensing [Xu and Ghamisi 2022].\nClean metrics may hide a second problem, since a model can reach excellent ac-\ncuracy by learning a shortcut that separates the training classes without capturing the phe-\nnomenon of interest, and convolutional networks are known to favor texture over shape\n[Geirhos et al. 2019]. Adversarial attacks can be used to perceive that, by observing how\ncontrolled perturbations affect the decision and outlining cases where simple artifacts\ngreatly influence the model output and outlining patterns recognized by the model. To\ninvestigate these failure modes, we propose an evaluation protocol that distinguishes be-\ntween them using a frequency-matched control. Our findings, together with the proposed\ndataset, support the hypothesis that the classifier relies on high-frequency texture and is\nvulnerable to asymmetry. \n2. Material and Methods \nWe used a Sentinel-2 dataset of the Brazilian Legal Amazon built from MapBiomas Col-\nlection 10 [Grupioni et al. 2026]. It contains 2600 cloud masked RGB patches from 2024\nimagery, half without mining and drawn from preserved forest, and the other 1300 strat-\nified into ten bands of mining proportion with 130 patches each.   We split each band \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n1"
+      },
+      {
+        "numero": 2,
+        "texto": "independently into 90 training, 20 validation and 20 test patches, so the test set holds ex-\nactly 20 patches of every band. The classifier has three blocks of   3   ×   3   convolution with\n32, 64 and 128 filters, batch normalization, ReLU, max pooling and dropout, followed by\na dense layer with 256 units and a sigmoid output, trained with Adam and early stopping\non the validation loss.\nWe evaluated seven kinds of perturbations. Random noise and low-pass noise are\nuniform and share the same   ℓ ∞   budget and mean shift, differing only in spatial frequency,\nwhich makes their comparison a controlled test of what the model uses. Brightness applies\na constant offset. Fog blends a white fractal Perlin mask and brightens the scene, while\nocclusion blends a dark canopy colored mask and darkens it, as a site operator could with\ntarpaulins. (Fast Gradient Sign Method) FGSM [Goodfellow et al. 2015] and projected\ngradient descent (PGD) are the white box gradient attacks.\nAccuracy under attack is not interpretable when the attack biases the model to-\nwards one class, since on a positive band an attack that predicts mining everywhere scores\nas correct. We therefore report the two directions separately, over the samples the clean\nmodel classifies correctly, as the fraction of forest turned into false positives and the frac-\ntion of mining evaded. With 20 patches per band, the Wilson interval for 0.55 is [0.34,\n0.74], so we group the bands in three levels. \n3. Results and Discussion \nOn clean data, the model reaches an accuracy of 0.9300, a precision of 1.0000, a recall\nof 0.8600 and an F1-Score of 0.9247, with an AUC of 0.9930. The confusion matrix is \n[[200 ,   0] ,   [28 ,   172]] , so it never classifies forest as mining, and 17 of the 28 false nega-\ntives fall in the two lowest bands, reproducing the known difficulty with incipient mining\n[Lemes Neto et al. 2026].\nTable 1 shows what happens under attack, and the failure is asymmetric. FGSM\nat 4/255 converts every forest patch into mining while evading 5.2% of the real mining,\na ratio of 19 to 1. The cheap attack against this model is not evasion but the injection\nof false positives, which, against an enforcement pipeline, means exhausting the analysts\nrather than hiding a mine. \nTable 1.   False positive rate on the negative class and evasion rate per band\ngroup, over the samples the clean model classifies correctly. \nFP rate   Evasion rate\nCondition   (forest)   < 20%   20–50%   > 50%\nNo attack   0.00   0.00   0.00   0.00\nRandom noise 4/255   0.45   0.00   0.00   0.00\nLow-pass noise 4/255   0.01   0.00   0.00   0.00\nBrightness   +0 . 05   0.01   0.04   0.02   0.00\nFGSM 4/255   1.00   0.04   0.04   0.06\nPGD-20 1/255   0.94   0.70   0.58   0.36\nThe two noise conditions identify the cause. They carry the same budget of 4/255\nand the same mean shift of 0.0001, differing only in spatial frequency. Random noise\nturns 45% of the forest into mining and low-pass noise turns 0.5%, with a Fisher exact \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n2"
+      },
+      {
+        "numero": 3,
+        "texto": "p   = 2   ×   10 − 31 . Brightness moves the mean by 0.0500, five hundred times more than\nrandom noise, and produces a false positive rate of only 0.01, while fog moves it by 0.0910\nand reaches 0.12. The decision is driven by high frequency texture and not by the mean\nspectral level. This is consistent with the data, since preserved forest is homogeneous and\nmining exposes soil, water and roads, so high frequency noise fabricates heterogeneity\nand the forest reads as mining.\nOcclusion, the physically realizable attack, darkens the scene, produces no false\npositives and evades at most 0.13.   Real evasion requires iterative PGD, and Figure 1\nshows both directions against the budget.   The evasion rate of FGSM decreases as the\nbudget grows, because a larger step drives every patch towards the mining class. \nFigure 1. Fraction of patches flipped in each direction as a function of the pertur-\nbation budget, over the samples the clean model classifies correctly. \nAt 1/255, where PGD is only partially effective, the evasion rate follows the min-\ning proportion. It is 0.70 below 20%, 0.58 between 20% and 50% and 0.36 above 50%,\na decreasing trend with   p   = 0 . 0027 . Evading the model is cheapest where the mining\nfootprint is smallest, which is where detection has the highest enforcement value. From\n2/255 onwards it saturates and this gradient disappears.\nThe main limitation is the dataset, and it is also the most useful part of the di-\nagnosis. All 1300 negative patches come from preserved forest, so the negative class is\ntrivially separable and the absence of false positives is an artifact of that choice. Texture\nenergy alone separates homogeneous forest from heterogeneous mining, so the network\nnever needed to learn the shape of a mining scar, and a boundary supported by a single\nproperty collapses under a perturbation that attacks it. The next step is therefore not a\ndefense on this model but a redesign of the dataset. A negative class containing bare soil,\nshallow water, agriculture, roads and burn scars would make texture energy insufficient\nand force the network to use spatial structure. Only then does adversarial training become\nmeaningful, since retraining a model that relies on a shortcut mostly hardens the shortcut.\nFor reproduction, seeds were fixed at 42 with deterministic cuDNN. The dataset\nis available on Zenodo ( https://doi.org/10.5281/zenodo.18983646 ) and\nthe   notebook   that   reproduces   every   number   and   figure,   including   the   visual   ex-\namples of each attack across all proportion bands,   at   https://github.com/\nleonardogrupioni/adversarial-attacks-cnn-mining-amazon . \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n3"
+      },
+      {
+        "numero": 4,
+        "texto": "References \nCamalan, S., Cui, K., Pauca, V. P., Alqahtani, S., Silman, M., Chan, R., Plemmons,\nR. J., Dethier, E. N., Fernandez, L. E., and Lutz, D. A. (2022). Change detection of\nAmazonian alluvial gold mining using deep learning and Sentinel-2 imagery.   Remote\nSensing , 14(7):1746.\nGeirhos, R., Rubisch, P., Michaelis, C., Bethge, M., Wichmann, F. A., and Brendel, W.\n(2019).   ImageNet-trained CNNs are biased towards texture; increasing shape bias\nimproves accuracy and robustness.   In   International Conference on Learning Repre-\nsentations (ICLR) .\nGlobal Initiative Against Transnational Organized Crime (2023).   Amazon underworld:\neconomias criminosas na maior floresta tropical do mundo. Technical report, GI-TOC\nand Amazon Watch and InfoAmazonia, Geneva, Switzerland. Institutional report.\nGoodfellow, I. J., Shlens, J., and Szegedy, C. (2015). Explaining and harnessing adver-\nsarial examples. In   International Conference on Learning Representations (ICLR) .\nGrupioni, L., Gallois, T. J., and Almeida, F. (2026). A sentinel-2 image dataset for mining\ndetection across mining proportion ranges in the brazilian legal amazon.   In   Anais\ndo XVII Workshop de Computac ¸ ˜ ao Aplicada ` a Gest˜ ao do Meio Ambiente e Recursos\nNaturais , pages 348–351, Porto Alegre, RS, Brasil. SBC.\nLemes Neto, N., Galo, M. d. L. B. T., de Oliveira, R. A., Watanabe, F. S. Y., and Galo,\nM. (2026). Towards SAR-Based monitoring of illegal mining in the Brazilian Amazon\nusing convolutional neural networks.   ISPRS Annals of the Photogrammetry, Remote\nSensing and Spatial Information Sciences , X-3-W4-2025:205–212.\nXu, Y. and Ghamisi, P. (2022).   Universal adversarial examples in remote sensing:\nMethodology and benchmark.   IEEE Transactions on Geoscience and Remote Sens-\ning , 60:1–15. \nA. Visual Effect of the Attacks \nFigure 2 shows one patch of six bands under the clean condition and under PGD at 4/255. \nFigure 2. Representative patches under PGD at 4/255. \n26º Simpósio Brasileiro de Cibersegurança (SBSeg 2026), Armação dos Búzios - RJ\nAnais Estendidos: Workshop de Cibersegurança em IA \n4"
+      }
+    ],
+    "triagem": {
+      "tipo": "decisions",
+      "modelo": "typesafe/jev-1.14-20261014",
+      "modeloSolicitado": "typesafe/jev-1.14",
+      "corte": 0.5,
+      "itens": [
+        {
+          "id": "Q1",
+          "sim": true,
+          "probabilidadeSim": 0.88
+        },
+        {
+          "id": "Q2",
+          "sim": true,
+          "probabilidadeSim": 0.97
+        },
+        {
+          "id": "Q3",
+          "sim": true,
+          "probabilidadeSim": 0.96
+        },
+        {
+          "id": "Q4",
+          "sim": true,
+          "probabilidadeSim": 0.98
+        }
+      ]
+    },
+    "sintese": {
+      "modelo": "gpt-5.5",
+      "resumo": "Os três avaliadores consideram o artigo relevante e com contribuição clara: o texto conecta classificadores de mineração em imagens de satélite a pipelines de fiscalização ambiental, tratando perturbações adversariais como risco prático para falsos positivos, evasão e sobrecarga de analistas. Também há consenso de que a proposta é bem posicionada frente à literatura, especialmente pelo uso de ataques adversariais como diagnóstico e pelo controle por frequência para investigar dependência de textura. As principais fragilidades apontadas concentram-se no desenho experimental e na verificabilidade detalhada: todos concordam que a classe negativa composta apenas por floresta preservada limita fortemente o cenário e pode tornar a separação trivial, fato reconhecido pelo próprio artigo. Há divergências moderadas sobre clareza, alcance das conclusões e reprodutibilidade: alguns avaliadores consideram que o texto delimita adequadamente suas conclusões e permite reconstrução com materiais externos, enquanto outros apontam inferências fortes não testadas e ausência de parâmetros decisivos no manuscrito.",
+      "itens": [
+        {
+          "id": "C1",
+          "comentario": "Há consenso de que o problema é bem motivado. Os avaliadores destacam que o artigo explicita o cenário de risco ao afirmar que saídas de CNNs para detecção de mineração começam a alimentar pipelines de fiscalização, tornando-se superfície de ataque. As consequências práticas também são identificadas: perturbações poderiam induzir falsos positivos, sobrecarregar analistas ou permitir evasão de minas reais. As evidências citadas concentram-se na p.1, no resumo e introdução, e na discussão de resultados nas p.2–3."
+        },
+        {
+          "id": "C2",
+          "comentario": "Os três avaliadores veem contribuição identificável e adequadamente situada. O artigo propõe um protocolo de avaliação com controle por frequência, usando ataques adversariais como ferramenta diagnóstica para distinguir fragilidade adversarial de dependência de textura de alta frequência. A relação com trabalhos anteriores é considerada pertinente, com menções a exemplos adversariais, sensoriamento remoto e viés textura-versus-forma em CNNs, incluindo referências como Goodfellow et al. 2015, Xu e Ghamisi 2022 e Geirhos et al. 2019."
+        },
+        {
+          "id": "C3",
+          "comentario": "A maioria considera a ideia central compreensível, com descrição do conjunto de dados, arquitetura, perturbações e métricas. Contudo, o Avaliador 3 aponta ambiguidades técnicas importantes no texto principal: construção exata do ruído passa-baixa, parametrização de FGSM/PGD, fog e occlusion, critérios de direcionamento, além de uma possível inconsistência entre 0,5% no texto e 0,01 na tabela para low-pass noise. O Avaliador 2 também reconhece lacunas pontuais de parametrização, embora julgue que elas não impedem compreender a afirmação central."
+        },
+        {
+          "id": "C4",
+          "comentario": "Há divergência moderada sobre o alcance das conclusões. Os Avaliadores 2 e 3 entendem que as conclusões são majoritariamente proporcionais, pois o artigo limita a interpretação ao modelo e ao conjunto de dados, reconhecendo como limitação central a classe negativa composta apenas por floresta preservada. Já o Avaliador 1 considera que o texto avança além da demonstração ao afirmar que a próxima etapa não deveria ser defesa neste modelo, mas redesenho do dataset, e que adversarial training só se tornaria significativo depois disso; para esse perfil, essa é uma inferência forte não testada diretamente."
+        },
+        {
+          "id": "E1",
+          "comentario": "Há consenso de que o desenho é pertinente, mas insuficientemente justificado em decisão decisiva de dados e cenário. Os avaliadores valorizam a comparação entre ruído aleatório, ruído passa-baixa, brilho, FGSM e PGD, bem como a separação entre falsos positivos e evasão. Porém, todos apontam como limitação central que toda a classe negativa vem de floresta preservada, o que o próprio artigo reconhece como fonte de separabilidade trivial e possível artefato na ausência de falsos positivos. O Avaliador 3 acrescenta limitações adicionais: uso de uma única arquitetura/modelo, poucos exemplos por faixa no teste e detalhes incompletos sobre ataques e perturbações."
+        },
+        {
+          "id": "E2",
+          "comentario": "Há divergência moderada sobre verificabilidade. Os Avaliadores 1 e 3 consideram que o artigo fornece ligação suficiente entre procedimento e resultados, citando divisão do dataset, arquitetura, perturbações, métricas, matriz de confusão, tabela de ataques, sementes fixas e links para dataset e notebook. O Avaliador 2 é mais cauteloso: embora reconheça a ligação entre achados e procedimento, aponta falta de detalhes decisivos no manuscrito para reconstrução independente, como tamanho dos patches, pré-processamento exato e parâmetros completos de ataques/otimização; também observa que o conteúdo dos materiais externos citados não pode ser verificado apenas a partir da submissão."
+        }
+      ]
+    }
+  }
+}

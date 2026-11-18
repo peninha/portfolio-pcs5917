@@ -1,0 +1,11 @@
+{
+  "name": "caderno-editorial-wcia",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs"
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.5.438"
+  }
+}
